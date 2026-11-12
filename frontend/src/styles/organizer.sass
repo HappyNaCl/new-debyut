@@ -1,0 +1,92 @@
+@use "tokens" as *
+@use "page" as *
+@use "form" as *
+
+.organizer-root
+  @include dashboard-page
+  @include form-fields
+
+  .organization-card
+    display: flex
+    align-items: flex-start
+    gap: 16px
+
+  .organization-text
+    display: flex
+    flex-direction: column
+    gap: 4px
+    flex: 1
+    min-width: 0
+
+  .organization-title
+    display: flex
+    align-items: center
+    gap: 10px
+    flex-wrap: wrap
+
+    h2
+      margin: 0
+      font-size: 20px
+      font-weight: 800
+      overflow-wrap: anywhere
+
+  .role-chip
+    display: inline-flex
+    align-items: center
+    height: 24px
+    padding: 0 10px
+    border-radius: 999px
+    background: $primary-soft
+    font-size: 12px
+    font-weight: 700
+    color: $primary
+
+  .organization-description
+    margin: 8px 0 0
+    font-size: 14px
+    line-height: 1.6
+    white-space: pre-line
+    overflow-wrap: anywhere
+
+  .organizer-section
+    display: flex
+    flex-direction: column
+    gap: 12px
+
+  .event-tabs
+    display: flex
+    overflow-x: auto
+    border-bottom: 1px solid $border
+
+  .event-tab
+    flex: 1
+    min-width: 140px
+    height: 48px
+    padding: 0 16px
+    border: none
+    border-bottom: 3px solid transparent
+    background: none
+    font-size: 14px
+    font-weight: 700
+    text-transform: uppercase
+    color: $text-muted
+    cursor: pointer
+
+    &:hover
+      color: $text
+
+    &.active
+      border-bottom-color: $primary
+      color: $text
+
+  .events-empty
+    border: none
+    padding: 72px 16px
+
+  .events-hint
+    font-size: 14px
+    color: $text-muted
+
+  @media (max-width: 640px)
+    .organization-card
+      flex-direction: column

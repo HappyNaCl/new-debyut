@@ -1,0 +1,188 @@
+services:
+  postgres:
+    container_name: new-debyut-db
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: debyut
+      POSTGRES_PASSWORD: debyut
+      POSTGRES_DB: debyut
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U debyut -d debyut"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - network
+  rabbitmq:
+    image: rabbitmq:3
+    container_name: new-debyut-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: debyut
+      RABBITMQ_DEFAULT_PASS: debyut
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - network
+  redis:
+    container_name: new-debyut-redis
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    networks:
+      - network
+
+  api-gateway:
+    container_name: new-debyut-api-gateway
+    image: new-debyut-api-gateway:v1.0.0
+    build:
+      context: ./backend
+      dockerfile: cmd/api-gateway/Dockerfile
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      - ENVIRONMENT=development
+      - AUTH_SERVICE_ADDR=auth-service:50051
+      - USER_SERVICE_ADDR=user-service:50052
+      - EVENT_SERVICE_ADDR=event-service:50053
+    depends_on:
+      - auth-service
+      - user-service
+      - event-service
+    networks:
+      - network
+
+  auth-service:
+    container_name: new-debyut-auth-service
+    image: new-debyut-auth-service:v1.0.0
+    build:
+      context: ./backend
+      dockerfile: cmd/auth-service/Dockerfile
+    env_file:
+      - .env
+    environment:
+      - ENVIRONMENT=development
+      - AUTH_SERVICE_ADDR=:50051
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - network
+
+  user-service:
+    container_name: new-debyut-user-service
+    image: new-debyut-user-service:v1.0.0
+    build:
+      context: ./backend
+      dockerfile: cmd/users-service/Dockerfile
+    env_file:
+      - .env
+    environment:
+      - ENVIRONMENT=development
+      - USER_SERVICE_ADDR=:50052
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+      rustfs:
+        condition: service_started
+    networks:
+      - network
+
+  event-service:
+    container_name: new-debyut-event-service
+    image: new-debyut-event-service:v1.0.0
+    build:
+      context: ./backend
+      dockerfile: cmd/event-service/Dockerfile
+    env_file:
+      - .env
+    environment:
+      - ENVIRONMENT=development
+      - EVENT_SERVICE_ADDR=:50053
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - network
+
+  email-service:
+    container_name: new-debyut-email-service
+    image: new-debyut-email-service:v1.0.0
+    build:
+      context: ./backend
+      dockerfile: cmd/email-service/Dockerfile
+    env_file:
+      - .env
+    environment:
+      - ENVIRONMENT=development
+    networks:
+      - network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+
+  rustfs:
+    container_name: new-debyut-rustfs
+    image: rustfs/rustfs:latest
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      RUSTFS_ACCESS_KEY: ${STORAGE_ACCESS_KEY:?set STORAGE_ACCESS_KEY in .env}
+      RUSTFS_SECRET_KEY: ${STORAGE_SECRET_KEY:?set STORAGE_SECRET_KEY in .env}
+      RUSTFS_ADDRESS: ":9000"
+      RUSTFS_CONSOLE_ADDRESS: ":9001"
+      RUSTFS_CONSOLE_ENABLE: "true"
+    volumes:
+      - rustfs_data:/data
+    networks:
+      - network
+
+  mailpit:
+    container_name: new-debyut-mailpit
+    image: axllent/mailpit:latest
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - network
+
+networks:
+  network:
+
+volumes:
+  rustfs_data:
+  redis_data:
+  postgres_data:
+  rabbitmq_data:

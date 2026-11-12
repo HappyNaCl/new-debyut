@@ -1,0 +1,25 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  cmd = "go build -o ./tmp/event-service ./cmd/event-service"
+  bin = "./tmp/event-service"
+  include_dir = ["cmd/event-service", "internal/event", "internal/common", "internal/genproto"]
+  exclude_dir = ["tmp", "vendor"]
+  include_ext = ["go"]
+  delay = 1000
+  kill_delay = 500
+  poll = true
+  poll_interval = 1000
+
+[log]
+  time = false
+
+[color]
+  main = "cyan"
+  watcher = "cyan"
+  build = "yellow"
+  runner = "green"
+
+[misc]
+  clean_on_exit = true

@@ -1,0 +1,324 @@
+@use "tokens" as *
+
+@mixin page-elements
+  .page-heading
+    display: flex
+    align-items: flex-end
+    justify-content: space-between
+    gap: 16px
+    flex-wrap: wrap
+
+    h1
+      margin: 0 0 4px
+      font-size: 24px
+      font-weight: 800
+      overflow-wrap: anywhere
+
+    p
+      margin: 0
+      font-size: 14px
+      color: $text-muted
+
+  .section-title
+    margin: 16px 0 0
+    font-size: 17px
+    font-weight: 800
+
+  .alert
+    padding: 10px 14px
+    border-radius: $radius
+    font-size: 14px
+
+  .alert-success
+    color: $info
+    background: $info-soft
+
+  .alert-error
+    color: $error
+    background: $error-soft
+
+  .card
+    padding: 20px
+    border: 1px solid $border
+    border-radius: 12px
+    background: $surface
+    box-shadow: $card-shadow
+
+  .state
+    display: flex
+    flex-direction: column
+    align-items: center
+    gap: 12px
+    padding: 48px 16px
+    border: 1px dashed $border
+    border-radius: 12px
+    text-align: center
+    color: $text-subtle
+
+    p
+      margin: 0
+      font-size: 15px
+      color: $text-muted
+
+  .item-list
+    display: flex
+    flex-direction: column
+    margin: 0
+    padding: 0
+    list-style: none
+    border: 1px solid $border
+    border-radius: 12px
+    background: $surface
+    overflow: hidden
+
+  .item-row
+    display: flex
+    align-items: center
+    gap: 12px
+    min-height: 64px
+    padding: 10px 16px
+
+    & + .item-row
+      border-top: 1px solid $border
+
+  .item-icon
+    display: inline-flex
+    align-items: center
+    justify-content: center
+    flex-shrink: 0
+    width: 40px
+    height: 40px
+    border-radius: $radius
+    background: $primary-soft
+    color: $primary
+
+  .item-text
+    display: flex
+    flex-direction: column
+    gap: 2px
+    flex: 1
+    min-width: 0
+
+  .item-title
+    font-size: 15px
+    font-weight: 700
+    overflow-wrap: anywhere
+
+  .item-detail
+    font-size: 13px
+    color: $text-muted
+    overflow-wrap: anywhere
+
+  .row-actions
+    display: flex
+    align-items: center
+    gap: 6px
+    flex-shrink: 0
+
+  .confirm-text
+    font-size: 14px
+    font-weight: 600
+
+  .icon-button
+    display: inline-flex
+    align-items: center
+    justify-content: center
+    width: 36px
+    height: 36px
+    border: none
+    border-radius: $radius
+    background: none
+    color: $text-muted
+    cursor: pointer
+    transition: background 0.15s, color 0.15s
+
+    &:hover
+      background: $surface-muted
+      color: $text
+
+    &.danger:hover
+      background: $error-soft
+      color: $error
+
+  .button-danger
+    display: inline-flex
+    align-items: center
+    justify-content: center
+    gap: 6px
+    height: 40px
+    padding: 0 16px
+    border: none
+    border-radius: $radius
+    background: $error
+    font-size: 14px
+    font-weight: 700
+    color: $on-primary
+    cursor: pointer
+
+    &:disabled
+      cursor: not-allowed
+      opacity: 0.55
+
+  .filter-tabs
+    display: flex
+    gap: 6px
+    flex-wrap: wrap
+
+  .filter-tab
+    height: 34px
+    padding: 0 14px
+    border: 1px solid $border
+    border-radius: 999px
+    background: $surface
+    font-size: 13px
+    font-weight: 700
+    color: $text-muted
+    cursor: pointer
+
+    &:hover
+      color: $text
+
+    &.active
+      border-color: $primary
+      background: $primary-soft
+      color: $primary
+
+  .text-input, .select-input
+    height: 40px
+    padding: 0 12px
+    border: 1px solid $border
+    border-radius: $radius
+    background: $surface
+    font-size: 14px
+    color: $text
+    outline: none
+
+    &:focus
+      border-color: $primary
+      box-shadow: $focus-ring
+
+  @media (max-width: 640px)
+    .page-heading .button-primary
+      width: 100%
+
+    .item-row
+      flex-wrap: wrap
+
+    .row-actions
+      margin-left: auto
+
+@mixin content-page
+  min-height: 100vh
+  display: flex
+  flex-direction: column
+
+  .page-content
+    display: flex
+    flex-direction: column
+    gap: 16px
+    width: 100%
+    max-width: 880px
+    margin: 0 auto
+    padding: 32px 24px 96px
+
+  @include page-elements
+
+  @media (max-width: 640px)
+    .page-content
+      padding: 24px 16px 96px
+
+@mixin dashboard-page
+  @include page-elements
+
+  .stat-grid
+    display: grid
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))
+    gap: 16px
+
+  .stat-card
+    display: flex
+    align-items: center
+    gap: 14px
+    padding: 18px 20px
+    border: 1px solid $border
+    border-radius: 12px
+    background: $surface
+    color: $text
+    box-shadow: $card-shadow
+    transition: border-color 0.15s
+
+    &:hover
+      border-color: $primary
+      text-decoration: none
+
+  .stat-text
+    display: flex
+    flex-direction: column
+    gap: 2px
+    min-width: 0
+
+  .stat-value
+    font-size: 26px
+    font-weight: 800
+    line-height: 1.1
+
+  .stat-label
+    font-size: 13px
+    font-weight: 600
+    color: $text-muted
+
+  .dashboard-form
+    display: flex
+    flex-direction: column
+    gap: 18px
+    max-width: 720px
+
+  .form-actions
+    display: flex
+    justify-content: flex-end
+    gap: 8px
+
+  .settings-list
+    display: flex
+    flex-direction: column
+    max-width: 720px
+    padding: 0
+    border: 1px solid $border
+    border-radius: 12px
+    background: $surface
+
+  .setting-row
+    display: flex
+    align-items: center
+    gap: 16px
+    padding: 18px 20px
+
+    & + .setting-row
+      border-top: 1px solid $border
+
+  .setting-text
+    display: flex
+    flex-direction: column
+    gap: 2px
+    flex: 1
+    min-width: 0
+
+  .setting-title
+    font-size: 15px
+    font-weight: 700
+
+  .setting-description
+    font-size: 13px
+    color: $text-muted
+
+  .section-heading
+    display: flex
+    align-items: center
+    justify-content: space-between
+    gap: 12px
+
+    .section-title
+      margin: 0
+
+    a
+      font-size: 14px

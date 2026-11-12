@@ -1,0 +1,9 @@
+.claude/
+CLAUDE.md
+.env
+tmp
+.env.local
+*.exe
+AGENTS.md
+.vscode
+TODO.md

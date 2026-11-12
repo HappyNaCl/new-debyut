@@ -1,0 +1,242 @@
+syntax = "proto3";
+
+option go_package = "github.com/HappyNaCl/new-debyut/internal/genproto/users";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+service UserService {
+    rpc GetMe(GetMeRequest) returns (GetMeResponse);
+    rpc UpdateMe(UpdateMeRequest) returns (GetMeResponse);
+    rpc UpdateAvatar(UpdateAvatarRequest) returns (GetMeResponse);
+}
+
+service OrganizerApplicationService {
+    rpc RequestEmailOtp(RequestEmailOtpRequest) returns (google.protobuf.Empty);
+    rpc VerifyEmailOtp(VerifyEmailOtpRequest) returns (VerifyEmailOtpResponse);
+    rpc SubmitApplication(SubmitApplicationRequest) returns (OrganizerApplication);
+    rpc ListMyApplications(ListMyApplicationsRequest) returns (ListApplicationsResponse);
+    rpc ListApplications(ListApplicationsRequest) returns (ListApplicationsResponse);
+    rpc ApproveApplication(ReviewApplicationRequest) returns (OrganizerApplication);
+    rpc DeclineApplication(ReviewApplicationRequest) returns (OrganizerApplication);
+}
+
+service OrganizationService {
+    rpc ListMyOrganizations(ListMyOrganizationsRequest) returns (ListOrganizationsResponse);
+    rpc ListOrganizations(ListOrganizationsRequest) returns (ListOrganizationsResponse);
+    rpc GetOrganization(OrganizationRequest) returns (Organization);
+    rpc UpdateOrganization(UpdateOrganizationRequest) returns (Organization);
+    rpc UpdateOrganizationAvatar(UpdateOrganizationAvatarRequest) returns (Organization);
+    rpc ListMembers(OrganizationRequest) returns (ListMembersResponse);
+    rpc RemoveMember(RemoveMemberRequest) returns (google.protobuf.Empty);
+    rpc CreateInvitation(CreateInvitationRequest) returns (Invitation);
+    rpc ListInvitations(OrganizationRequest) returns (ListInvitationsResponse);
+    rpc RevokeInvitation(InvitationActionRequest) returns (google.protobuf.Empty);
+    rpc ListMyInvitations(ListMyInvitationsRequest) returns (ListInvitationsResponse);
+    rpc AcceptInvitation(InvitationActionRequest) returns (OrganizationMember);
+    rpc DeclineInvitation(InvitationActionRequest) returns (google.protobuf.Empty);
+}
+
+message GetMeRequest {
+    string id = 1;
+}
+
+message GetMeResponse {
+    string id = 1;
+    string first_name = 2;
+    string surname = 3;
+    google.protobuf.Timestamp date_of_birth = 4;
+    string phone_number = 5;
+    string gender = 6;
+    bool subscribe_newsletter = 7;
+    string avatar_url = 8;
+}
+
+message UpdateMeRequest {
+    string id = 1;
+    string first_name = 2;
+    string surname = 3;
+    google.protobuf.Timestamp date_of_birth = 4;
+    string phone_number = 5;
+    string gender = 6;
+    bool subscribe_newsletter = 7;
+}
+
+enum ApplicationStatus {
+    APPLICATION_STATUS_UNSPECIFIED = 0;
+    PENDING = 1;
+    APPROVED = 2;
+    DECLINED = 3;
+}
+
+message OrganizerApplication {
+    string id = 1;
+    string user_id = 2;
+    string organization_name = 3;
+    string organization_email = 4;
+    string description = 5;
+    ApplicationStatus status = 6;
+    string reviewed_by = 7;
+    google.protobuf.Timestamp reviewed_at = 8;
+    google.protobuf.Timestamp created_at = 9;
+    string organization_id = 10;
+}
+
+message RequestEmailOtpRequest {
+    string user_id = 1;
+    string email = 2;
+}
+
+message VerifyEmailOtpRequest {
+    string user_id = 1;
+    string email = 2;
+    string otp = 3;
+}
+
+message VerifyEmailOtpResponse {
+    string verification_token = 1;
+}
+
+message SubmitApplicationRequest {
+    string user_id = 1;
+    string verification_token = 2;
+    string organization_name = 3;
+    string description = 4;
+}
+
+message ListMyApplicationsRequest {
+    string user_id = 1;
+}
+
+message ListApplicationsRequest {
+    ApplicationStatus status = 1;
+    int32 page = 2;
+    int32 page_size = 3;
+}
+
+message ListApplicationsResponse {
+    repeated OrganizerApplication applications = 1;
+    int64 total = 2;
+}
+
+message ReviewApplicationRequest {
+    string application_id = 1;
+    string reviewer_id = 2;
+}
+
+enum MemberRole {
+    MEMBER_ROLE_UNSPECIFIED = 0;
+    OWNER = 1;
+    STAFF = 2;
+}
+
+message Organization {
+    string id = 1;
+    string name = 2;
+    string email = 3;
+    string description = 4;
+    MemberRole my_role = 5;
+    google.protobuf.Timestamp created_at = 6;
+    int64 member_count = 7;
+    string avatar_url = 8;
+}
+
+message OrganizationMember {
+    string organization_id = 1;
+    string user_id = 2;
+    string first_name = 3;
+    string surname = 4;
+    MemberRole role = 5;
+    google.protobuf.Timestamp joined_at = 6;
+}
+
+message ListMyOrganizationsRequest {
+    string user_id = 1;
+}
+
+message ListOrganizationsRequest {
+    string search = 1;
+    int32 page = 2;
+    int32 page_size = 3;
+}
+
+message ListOrganizationsResponse {
+    repeated Organization organizations = 1;
+    int64 total = 2;
+}
+
+message OrganizationRequest {
+    string organization_id = 1;
+    string actor_id = 2;
+}
+
+message UpdateAvatarRequest {
+    string id = 1;
+    bytes content = 2;
+}
+
+message UpdateOrganizationAvatarRequest {
+    string organization_id = 1;
+    string actor_id = 2;
+    bytes content = 3;
+}
+
+message UpdateOrganizationRequest {
+    string organization_id = 1;
+    string actor_id = 2;
+    string name = 3;
+    string description = 4;
+}
+
+message ListMembersResponse {
+    repeated OrganizationMember members = 1;
+}
+
+message RemoveMemberRequest {
+    string organization_id = 1;
+    string actor_id = 2;
+    string user_id = 3;
+}
+
+enum InvitationStatus {
+    INVITATION_STATUS_UNSPECIFIED = 0;
+    INVITATION_PENDING = 1;
+    INVITATION_ACCEPTED = 2;
+    INVITATION_DECLINED = 3;
+    INVITATION_REVOKED = 4;
+    INVITATION_EXPIRED = 5;
+}
+
+message Invitation {
+    string id = 1;
+    string organization_id = 2;
+    string organization_name = 3;
+    string email = 4;
+    MemberRole role = 5;
+    InvitationStatus status = 6;
+    string invited_by = 7;
+    google.protobuf.Timestamp expires_at = 8;
+    google.protobuf.Timestamp created_at = 9;
+}
+
+message CreateInvitationRequest {
+    string organization_id = 1;
+    string actor_id = 2;
+    string email = 3;
+    MemberRole role = 4;
+}
+
+message InvitationActionRequest {
+    string invitation_id = 1;
+    string actor_id = 2;
+    string actor_email = 3;
+    string organization_id = 4;
+}
+
+message ListMyInvitationsRequest {
+    string email = 1;
+}
+
+message ListInvitationsResponse {
+    repeated Invitation invitations = 1;
+}

@@ -1,0 +1,94 @@
+$primary: var(--color-primary)
+$primary-hover: var(--color-primary-hover)
+$primary-soft: var(--color-primary-soft)
+$on-primary: var(--color-on-primary)
+$strong: var(--color-strong)
+$on-strong: var(--color-on-strong)
+$text: var(--color-text)
+$text-muted: var(--color-text-muted)
+$text-subtle: var(--color-text-subtle)
+$border: var(--color-border)
+$background: var(--color-background)
+$surface: var(--color-surface)
+$surface-muted: var(--color-surface-muted)
+$error: var(--color-error)
+$error-soft: var(--color-error-soft)
+$info: var(--color-info)
+$info-soft: var(--color-info-soft)
+$warning: var(--color-warning)
+$warning-soft: var(--color-warning-soft)
+$focus-ring: var(--focus-ring)
+$card-shadow: var(--card-shadow)
+$radius: 8px
+
+@mixin light-theme
+  color-scheme: light
+  --color-primary: #0049cc
+  --color-primary-hover: #003ba6
+  --color-primary-soft: #e6efff
+  --color-on-primary: #ffffff
+  --color-strong: #13254f
+  --color-on-strong: #ffffff
+  --color-text: #151416
+  --color-text-muted: #6b6f7b
+  --color-text-subtle: #9aa0ab
+  --color-border: #d6dbe4
+  --color-background: #ffffff
+  --color-surface: #ffffff
+  --color-surface-muted: #f4f6f9
+  --color-error: #d32f2f
+  --color-error-soft: #fdecec
+  --color-info: #0b6b3a
+  --color-info-soft: #e7f6ed
+  --color-warning: #8a5a00
+  --color-warning-soft: #fff4dc
+  --focus-ring: 0 0 0 3px rgba(0, 73, 204, 0.15)
+  --card-shadow: 0 2px 16px rgba(21, 20, 22, 0.08)
+  --illustration-backdrop: #e6efff
+  --illustration-ticket: #0049cc
+  --illustration-ticket-back: #8fb4ff
+  --color-sidebar: #13254f
+  --color-sidebar-raised: rgba(255, 255, 255, 0.07)
+  --color-sidebar-hover: rgba(255, 255, 255, 0.08)
+  --color-sidebar-border: rgba(255, 255, 255, 0.1)
+  --color-sidebar-text: rgba(255, 255, 255, 0.78)
+  --color-sidebar-heading: #ffffff
+  --color-sidebar-muted: rgba(255, 255, 255, 0.5)
+  --color-backdrop: rgba(15, 17, 21, 0.5)
+  --color-switch-thumb: #ffffff
+
+@mixin dark-theme
+  color-scheme: dark
+  --color-primary: #4a86ff
+  --color-primary-hover: #6b9cff
+  --color-primary-soft: rgba(74, 134, 255, 0.16)
+  --color-on-primary: #0b1020
+  --color-strong: #e3e8f4
+  --color-on-strong: #0f1115
+  --color-text: #eef0f4
+  --color-text-muted: #a3a9b6
+  --color-text-subtle: #737a88
+  --color-border: #2e3440
+  --color-background: #0f1115
+  --color-surface: #171a21
+  --color-surface-muted: #1f232c
+  --color-error: #ff7b7b
+  --color-error-soft: rgba(255, 123, 123, 0.12)
+  --color-info: #5fd39a
+  --color-info-soft: rgba(95, 211, 154, 0.12)
+  --color-warning: #f2c063
+  --color-warning-soft: rgba(242, 192, 99, 0.14)
+  --focus-ring: 0 0 0 3px rgba(74, 134, 255, 0.3)
+  --card-shadow: 0 2px 16px rgba(0, 0, 0, 0.45)
+  --illustration-backdrop: #1c2740
+  --illustration-ticket: #3a74f0
+  --illustration-ticket-back: #2b4a85
+  --color-sidebar: #12151c
+  --color-sidebar-raised: rgba(255, 255, 255, 0.05)
+  --color-sidebar-hover: rgba(255, 255, 255, 0.06)
+  --color-sidebar-border: #262b35
+  --color-sidebar-text: #b4bac6
+  --color-sidebar-heading: #eef0f4
+  --color-sidebar-muted: #737a88
+  --color-backdrop: rgba(0, 0, 0, 0.6)
+  --color-switch-thumb: #eef0f4

@@ -1,0 +1,1803 @@
+basePath: /api
+definitions:
+  dto.ApplicationListResponse:
+    properties:
+      applications:
+        items:
+          $ref: '#/definitions/dto.ApplicationResponse'
+        type: array
+      total:
+        type: integer
+    type: object
+  dto.ApplicationResponse:
+    properties:
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      organizationEmail:
+        type: string
+      organizationId:
+        type: string
+      organizationName:
+        type: string
+      reviewedAt:
+        type: string
+      reviewedBy:
+        type: string
+      status:
+        type: string
+      userId:
+        type: string
+    type: object
+  dto.AuthResponse:
+    properties:
+      accessToken:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      role:
+        type: string
+    type: object
+  dto.CategoryRequest:
+    properties:
+      icon:
+        maxLength: 64
+        type: string
+      name:
+        maxLength: 100
+        type: string
+      slug:
+        maxLength: 64
+        type: string
+    required:
+    - icon
+    - name
+    type: object
+  dto.CategoryResponse:
+    properties:
+      createdAt:
+        type: string
+      icon:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      slug:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  dto.CompleteRegistrationRequest:
+    properties:
+      agreeToTerms:
+        type: boolean
+      dateOfBirth:
+        type: string
+      firstName:
+        maxLength: 100
+        type: string
+      gender:
+        enum:
+        - MALE
+        - FEMALE
+        type: string
+      phoneNumber:
+        type: string
+      registrationToken:
+        type: string
+      subscribeNewsletter:
+        type: boolean
+      surname:
+        maxLength: 100
+        type: string
+    required:
+    - agreeToTerms
+    - dateOfBirth
+    - firstName
+    - gender
+    - phoneNumber
+    - registrationToken
+    type: object
+  dto.CreateInvitationRequest:
+    properties:
+      email:
+        maxLength: 255
+        type: string
+      role:
+        enum:
+        - OWNER
+        - STAFF
+        type: string
+    required:
+    - email
+    - role
+    type: object
+  dto.EmailRequest:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
+  dto.HealthResponse:
+    properties:
+      status:
+        type: integer
+      uptime:
+        type: string
+    type: object
+  dto.InvitationResponse:
+    properties:
+      createdAt:
+        type: string
+      email:
+        type: string
+      expiresAt:
+        type: string
+      id:
+        type: string
+      invitedBy:
+        type: string
+      organizationId:
+        type: string
+      organizationName:
+        type: string
+      role:
+        type: string
+    type: object
+  dto.MeResponse:
+    properties:
+      avatarUrl:
+        type: string
+      dateOfBirth:
+        type: string
+      firstName:
+        type: string
+      gender:
+        type: string
+      id:
+        type: string
+      phoneNumber:
+        type: string
+      role:
+        type: string
+      subscribeNewsletter:
+        type: boolean
+      surname:
+        type: string
+    type: object
+  dto.MemberResponse:
+    properties:
+      firstName:
+        type: string
+      joinedAt:
+        type: string
+      role:
+        type: string
+      surname:
+        type: string
+      userId:
+        type: string
+    type: object
+  dto.OrganizationEmailRequest:
+    properties:
+      email:
+        maxLength: 255
+        type: string
+    required:
+    - email
+    type: object
+  dto.OrganizationPageResponse:
+    properties:
+      organizations:
+        items:
+          $ref: '#/definitions/dto.OrganizationResponse'
+        type: array
+      total:
+        type: integer
+    type: object
+  dto.OrganizationResponse:
+    properties:
+      avatarUrl:
+        type: string
+      createdAt:
+        type: string
+      description:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      memberCount:
+        type: integer
+      myRole:
+        type: string
+      name:
+        type: string
+    type: object
+  dto.RegistrationTokenResponse:
+    properties:
+      registrationToken:
+        type: string
+    type: object
+  dto.SubmitApplicationRequest:
+    properties:
+      description:
+        maxLength: 2000
+        type: string
+      organizationName:
+        maxLength: 150
+        type: string
+      verificationToken:
+        type: string
+    required:
+    - description
+    - organizationName
+    - verificationToken
+    type: object
+  dto.TokenResponse:
+    properties:
+      accessToken:
+        type: string
+    type: object
+  dto.UpdateMeRequest:
+    properties:
+      dateOfBirth:
+        type: string
+      firstName:
+        maxLength: 100
+        type: string
+      gender:
+        enum:
+        - MALE
+        - FEMALE
+        type: string
+      phoneNumber:
+        type: string
+      subscribeNewsletter:
+        type: boolean
+      surname:
+        maxLength: 100
+        type: string
+    required:
+    - dateOfBirth
+    - firstName
+    - gender
+    - phoneNumber
+    type: object
+  dto.UpdateOrganizationRequest:
+    properties:
+      description:
+        maxLength: 2000
+        type: string
+      name:
+        maxLength: 150
+        type: string
+    required:
+    - description
+    - name
+    type: object
+  dto.VerificationTokenResponse:
+    properties:
+      verificationToken:
+        type: string
+    type: object
+  dto.VerifyOrganizationEmailRequest:
+    properties:
+      email:
+        maxLength: 255
+        type: string
+      otp:
+        type: string
+    required:
+    - email
+    - otp
+    type: object
+  dto.VerifyOtpRequest:
+    properties:
+      email:
+        type: string
+      otp:
+        type: string
+    required:
+    - email
+    - otp
+    type: object
+info:
+  contact: {}
+  description: REST API exposed by the debyut api-gateway. The gateway translates
+    these HTTP calls into gRPC requests to the auth, users, and event services.
+  title: debyut API Gateway
+  version: "1.0"
+paths:
+  /admin/categories:
+    post:
+      consumes:
+      - application/json
+      description: The slug is generated from the name when omitted. Slug and icon
+        must be lowercase letters, numbers, and hyphens; icon is a key from the frontend's
+        icon set.
+      parameters:
+      - description: Category
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            properties:
+              data:
+                $ref: '#/definitions/dto.CategoryResponse'
+            type: object
+        "400":
+          description: Validation error
+          schema:
+            properties:
+              error:
+                type: object
+            type: object
+        "401":
+          description: Missing or invalid access token
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Not an admin
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "409":
+          description: Name or slug already used
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create an event category (admin)
+      tags:
+      - Categories
+  /admin/categories/{id}:
+    delete:
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Missing or invalid access token
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Not an admin
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Category not found
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete an event category (admin)
+      tags:
+      - Categories
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Category
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              data:
+                $ref: '#/definitions/dto.CategoryResponse'
+            type: object
+        "400":
+          description: Validation error
+          schema:
+            properties:
+              error:
+                type: object
+            type: object
+        "401":
+          description: Missing or invalid access token
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Not an admin
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Category not found
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "409":
+          description: Name or slug already used
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update an event category (admin)
+      tags:
+      - Categories
+  /admin/organizations:
+    get:
+      parameters:
+      - description: Match against organization name or email
+        in: query
+        name: search
+        type: string
+      - description: Page number (default 1)
+        in: query
+        name: page
+        type: integer
+      - description: Page size (default 20, max 100)
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              data:
+                $ref: '#/definitions/dto.OrganizationPageResponse'
+            type: object
+        "400":
+          description: Validation error
+          schema:
+            properties:
+              error:
+                type: object
+            type: object
+        "401":
+          description: Missing or invalid access token
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Not an admin
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List all organizations (admin)
+      tags:
+      - Organizations
+  /admin/organizer-applications:
+    get:
+      parameters:
+      - description: Filter by status
+        enum:
+        - PENDING
+        - APPROVED
+        - DECLINED
+        in: query
+        name: status
+        type: string
+      - description: Page number (default 1)
+        in: query
+        name: page
+        type: integer
+      - description: Page size (default 20, max 100)
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              data:
+                $ref: '#/definitions/dto.ApplicationListResponse'
+            type: object
+        "400":
+          description: Validation error
+          schema:
+            properties:
+              error:
+                type: object
+            type: object
+        "401":
+          description: Missing or invalid access token
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Not an admin
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List organizer applications (admin)
+      tags:
+      - Organizer Applications
+  /admin/organizer-applications/{id}/approve:
+    post:
+      description: Marks the application approved, creates the organization with the
+        applicant as its OWNER, and gives the applicant the ORGANIZER role. The new
+        role appears in the applicant's next access token (after a refresh).
+      parameters:
+      - description: Application ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              data:
+                $ref: '#/definitions/dto.ApplicationResponse'
+            type: object
+        "400":
+          description: Application already reviewed
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Missing or invalid access token
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Not an admin
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Application not found
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Approve an organizer application (admin)
+      tags:
+      - Organizer Applications
+  /admin/organizer-applications/{id}/decline:
+    post:
+      description: Marks the application declined. The applicant may submit a new
+        application afterwards.
+      parameters:
+      - description: Application ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              data:
+                $ref: '#/definitions/dto.ApplicationResponse'
+            type: object
+        "400":
+          description: Application already reviewed
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Missing or invalid access token
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Not an admin
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Application not found
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Decline an organizer application (admin)
+      tags:
+      - Organizer Applications
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Emails a one-time password to a registered address. Calling it
+        again resends the code (1-minute cooldown).
+      parameters:
+      - description: Registered email
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.EmailRequest'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: Validation error
+          schema:
+            properties:
+              error:
+                type: object
+            type: object
+        "404":
+          description: No account with this email
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "429":
+          description: OTP requested too recently
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      summary: Start login (step 1 — email OTP)
+      tags:
+      - Auth
+  /auth/login/verify:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Email and 6-digit OTP
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.VerifyOtpRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              data:
+                $ref: '#/definitions/dto.AuthResponse'
+            type: object
+        "400":
+          description: Validation error, or invalid/expired OTP
+          schema:
+            properties:
+              error:
+                type: object
+            type: object
+      summary: Verify the login OTP (step 2)
+      tags:
+      - Auth
+  /auth/logout:
+    post:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              message:
+                type: string
+            type: object
+        "401":
+          description: Missing or invalid access token
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Revoke all refresh tokens for the current user
+      tags:
+      - Auth
+  /auth/refresh:
+    post:
+      description: Reads the refresh token from the httpOnly refreshToken cookie,
+        rotates it, sets a new cookie, and returns a fresh access token in the body.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              data:
+                $ref: '#/definitions/dto.TokenResponse'
+            type: object
+        "401":
+          description: Missing, invalid, expired, or reused refresh token
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      summary: Rotate the refresh token (from httpOnly cookie) for a new access token
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Emails a one-time password to an address that is not yet registered.
+        Calling it again resends the code (1-minute cooldown). The code expires after
+        5 minutes or 5 wrong attempts.
+      parameters:
+      - description: Email to register
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.EmailRequest'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: Validation error
+          schema:
+            properties:
+              error:
+                type: object
+            type: object
+        "409":
+          description: Email already registered
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "429":
+          description: OTP requested too recently
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      summary: Start registration (step 1 — email OTP)
+      tags:
+      - Auth
+  /auth/register/complete:
+    post:
+      consumes:
+      - application/json
+      description: Creates the account for the verified email, stores the profile,
+        and logs the user in. Surname is optional; agreeToTerms must be true; the
+        user must be at least 18.
+      parameters:
+      - description: Profile data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CompleteRegistrationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            properties:
+              data:
+                $ref: '#/definitions/dto.AuthResponse'
+            type: object
+        "400":
+          description: Validation error, under-age, terms not accepted, or registration
+            token expired
+          schema:
+            properties:
+              error:
+                type: object
+            type: object
+        "409":
+          description: Email already registered
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      summary: Complete registration with profile data (step 3)
+      tags:
+      - Auth
+  /auth/register/verify:
+    post:
+      consumes:
+      - application/json
+      description: Exchanges a valid OTP for a registration token (valid 30 minutes)
+        that authorizes completing the profile.
+      parameters:
+      - description: Email and 6-digit OTP
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.VerifyOtpRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              data:
+                $ref: '#/definitions/dto.RegistrationTokenResponse'
+            type: object
+        "400":
+          description: Validation error, or invalid/expired OTP
+          schema:
+            properties:
+              error:
+                type: object
+            type: object
+      summary: Verify the registration OTP (step 2)
+      tags:
+      - Auth
+  /categories:
+    get:
+      description: Public. Sorted by name.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              data:
+                items:
+                  $ref: '#/definitions/dto.CategoryResponse'
+                type: array
+            type: object
+      summary: List event categories
+      tags:
+      - Categories
+  /health:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.HealthResponse'
+      summary: Service health and uptime
+      tags:
+      - Health
+  /invitations/{id}/accept:
+    post:
+      description: Joins the organization with the invited role. The invitation must
+        be addressed to the current user's email. The user gets the ORGANIZER role
+        (visible after the next token refresh).
+      parameters:
+      - description: Invitation ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              data:
+                $ref: '#/definitions/dto.MemberResponse'
+            type: object
+        "400":
+          description: Invitation expired, revoked, or already answered
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Missing or invalid access token
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Invitation not found
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "409":
+          description: Already a member
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Accept an invitation
+      tags:
+      - Invitations
+  /invitations/{id}/decline:
+    post:
+      parameters:
+      - description: Invitation ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Missing or invalid access token
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Pending invitation not found
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Decline an invitation
+      tags:
+      - Invitations
+  /invitations/me:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              data:
+                items:
+                  $ref: '#/definitions/dto.InvitationResponse'
+                type: array
+            type: object
+        "401":
+          description: Missing or invalid access token
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List pending invitations for the current user's email
+      tags:
+      - Invitations
+  /me:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              data:
+                $ref: '#/definitions/dto.MeResponse'
+            type: object
+        "401":
+          description: Missing or invalid access token
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get the current user's profile
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      description: Replaces the profile fields, including the newsletter opt-in. Users
+        must stay 18+.
+      parameters:
+      - description: Profile fields
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateMeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              data:
+                $ref: '#/definitions/dto.MeResponse'
+            type: object
+        "400":
+          description: Validation error or under-age
+          schema:
+            properties:
+              error:
+                type: object
+            type: object
+        "401":
+          description: Missing or invalid access token
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update the current user's profile
+      tags:
+      - Users
+  /me/avatar:
+    put:
+      consumes:
+      - multipart/form-data
+      description: Replaces the avatar with a JPEG, PNG or WebP image up to 2 MB.
+      parameters:
+      - description: Avatar image
+        in: formData
+        name: avatar
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              data:
+                $ref: '#/definitions/dto.MeResponse'
+            type: object
+        "400":
+          description: Missing, too large, or unsupported image
+          schema:
+            properties:
+              error:
+                type: object
+            type: object
+        "401":
+          description: Missing or invalid access token
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Upload the current user's avatar
+      tags:
+      - Users
+  /organizations/{id}:
+    get:
+      description: Only members can see an organization; for anyone else it does not
+        exist.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              data:
+                $ref: '#/definitions/dto.OrganizationResponse'
+            type: object
+        "401":
+          description: Missing or invalid access token
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Organization not found
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get an organization
+      tags:
+      - Organizations
+    put:
+      consumes:
+      - application/json
+      description: Changes the organization's name and description. The email is verified
+        at application time and cannot be changed here.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Name and description
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateOrganizationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              data:
+                $ref: '#/definitions/dto.OrganizationResponse'
+            type: object
+        "400":
+          description: Validation error
+          schema:
+            properties:
+              error:
+                type: object
+            type: object
+        "401":
+          description: Missing or invalid access token
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Not an owner
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Organization not found
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update an organization (owners only)
+      tags:
+      - Organizations
+  /organizations/{id}/avatar:
+    put:
+      consumes:
+      - multipart/form-data
+      description: Replaces the avatar with a JPEG, PNG or WebP image up to 2 MB.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Avatar image
+        in: formData
+        name: avatar
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              data:
+                $ref: '#/definitions/dto.OrganizationResponse'
+            type: object
+        "400":
+          description: Missing, too large, or unsupported image
+          schema:
+            properties:
+              error:
+                type: object
+            type: object
+        "401":
+          description: Missing or invalid access token
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Not an owner
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Organization not found
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Upload an organization's avatar (owners only)
+      tags:
+      - Organizations
+  /organizations/{id}/invitations:
+    get:
+      parameters:
+      - description: Organization ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              data:
+                items:
+                  $ref: '#/definitions/dto.InvitationResponse'
+                type: array
+            type: object
+        "401":
+          description: Missing or invalid access token
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Not an owner
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Organization not found
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List an organization's pending invitations (owners only)
+      tags:
+      - Organizations
+    post:
+      consumes:
+      - application/json
+      description: Emails an invitation to join as OWNER or STAFF. The address does
+        not need a debyut account yet. Invitations expire after 7 days; one pending
+        invitation per email per organization.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Invitee email and role
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateInvitationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            properties:
+              data:
+                $ref: '#/definitions/dto.InvitationResponse'
+            type: object
+        "400":
+          description: Validation error
+          schema:
+            properties:
+              error:
+                type: object
+            type: object
+        "401":
+          description: Missing or invalid access token
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Not an owner
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Organization not found
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "409":
+          description: This email already has a pending invitation
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Invite someone to an organization (owners only)
+      tags:
+      - Organizations
+  /organizations/{id}/invitations/{invitationId}:
+    delete:
+      parameters:
+      - description: Organization ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Invitation ID
+        in: path
+        name: invitationId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Missing or invalid access token
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Not an owner
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Organization or pending invitation not found
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Revoke a pending invitation (owners only)
+      tags:
+      - Organizations
+  /organizations/{id}/members:
+    get:
+      parameters:
+      - description: Organization ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              data:
+                items:
+                  $ref: '#/definitions/dto.MemberResponse'
+                type: array
+            type: object
+        "401":
+          description: Missing or invalid access token
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Organization not found
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List an organization's members
+      tags:
+      - Organizations
+  /organizations/{id}/members/{userId}:
+    delete:
+      description: Owners can remove anyone; any member can remove themselves. The
+        last owner cannot be removed. A user who leaves their last organization goes
+        back to the USER role.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User ID of the member
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Would remove the last owner
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Missing or invalid access token
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Not an owner
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Organization or member not found
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Remove a member, or leave an organization
+      tags:
+      - Organizations
+  /organizations/me:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              data:
+                items:
+                  $ref: '#/definitions/dto.OrganizationResponse'
+                type: array
+            type: object
+        "401":
+          description: Missing or invalid access token
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List organizations the current user belongs to
+      tags:
+      - Organizations
+  /organizer-applications:
+    post:
+      consumes:
+      - application/json
+      description: Submits the application for admin review using the verified organization
+        email. Users and existing organizers can apply (an organizer applies to create
+        another organization). A user may have one pending application at a time and
+        can apply again after a decline.
+      parameters:
+      - description: Verification token and organization details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SubmitApplicationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            properties:
+              data:
+                $ref: '#/definitions/dto.ApplicationResponse'
+            type: object
+        "400":
+          description: Validation error, or email verification expired
+          schema:
+            properties:
+              error:
+                type: object
+            type: object
+        "401":
+          description: Missing or invalid access token
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Admins cannot apply
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "409":
+          description: An application is already pending
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Submit the organizer application (step 3 — Work with us)
+      tags:
+      - Organizer Applications
+  /organizer-applications/email:
+    post:
+      consumes:
+      - application/json
+      description: Emails a one-time password to the organization's email. Calling
+        it again resends the code (1-minute cooldown). The code expires after 5 minutes
+        or 5 wrong attempts.
+      parameters:
+      - description: Organization email
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.OrganizationEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: Validation error
+          schema:
+            properties:
+              error:
+                type: object
+            type: object
+        "401":
+          description: Missing or invalid access token
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Admins cannot apply
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "429":
+          description: OTP requested too recently
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Verify the organization email (step 1 — email OTP)
+      tags:
+      - Organizer Applications
+  /organizer-applications/email/verify:
+    post:
+      consumes:
+      - application/json
+      description: Exchanges a valid OTP for a verification token (valid 30 minutes)
+        that authorizes submitting the application.
+      parameters:
+      - description: Organization email and 6-digit OTP
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.VerifyOrganizationEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              data:
+                $ref: '#/definitions/dto.VerificationTokenResponse'
+            type: object
+        "400":
+          description: Validation error, or invalid/expired OTP
+          schema:
+            properties:
+              error:
+                type: object
+            type: object
+        "401":
+          description: Missing or invalid access token
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Admins cannot apply
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Verify the organization email OTP (step 2)
+      tags:
+      - Organizer Applications
+  /organizer-applications/me:
+    get:
+      description: Newest first, including declined ones.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              data:
+                $ref: '#/definitions/dto.ApplicationListResponse'
+            type: object
+        "401":
+          description: Missing or invalid access token
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List the current user's organizer applications
+      tags:
+      - Organizer Applications
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+option go_package = "github.com/HappyNaCl/new-debyut/internal/genproto/auth";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+service AuthService {
+    rpc RequestRegisterOtp(EmailRequest) returns (google.protobuf.Empty);
+    rpc VerifyRegisterOtp(VerifyOtpRequest) returns (VerifyRegisterOtpResponse);
+    rpc CompleteRegistration(CompleteRegistrationRequest) returns (AuthenticationResponse);
+    rpc RequestLoginOtp(EmailRequest) returns (google.protobuf.Empty);
+    rpc VerifyLoginOtp(VerifyOtpRequest) returns (AuthenticationResponse);
+    rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse);
+    rpc Logout(LogoutRequest) returns (google.protobuf.Empty);
+}
+
+enum Role {
+    ROLE_UNSPECIFIED = 0;
+    ADMIN = 1;
+    USER = 2;
+    ORGANIZER = 3;
+}
+
+message EmailRequest {
+    string email = 1;
+}
+
+message VerifyOtpRequest {
+    string email = 1;
+    string otp = 2;
+}
+
+message VerifyRegisterOtpResponse {
+    string registration_token = 1;
+}
+
+message CompleteRegistrationRequest {
+    string registration_token = 1;
+    string first_name = 2;
+    string surname = 3;
+    google.protobuf.Timestamp date_of_birth = 4;
+    string phone_number = 5;
+    string gender = 6;
+    bool agree_to_terms = 7;
+    bool subscribe_newsletter = 8;
+}
+
+message RefreshTokenRequest {
+    string refresh_token = 1;
+}
+
+message LogoutRequest {
+    string user_id = 1;
+}
+
+message RefreshTokenResponse {
+    string access_token = 1;
+    string refresh_token = 2;
+}
+
+message AuthenticationResponse {
+    string id = 1;
+    string email = 2;
+    Role role = 3;
+    string access_token = 4;
+    string refresh_token = 5;
+}

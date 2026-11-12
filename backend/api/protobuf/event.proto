@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+option go_package = "github.com/HappyNaCl/new-debyut/internal/genproto/event";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+service EventService {
+    rpc ListCategories(google.protobuf.Empty) returns (ListCategoriesResponse);
+    rpc CreateCategory(CreateCategoryRequest) returns (Category);
+    rpc UpdateCategory(UpdateCategoryRequest) returns (Category);
+    rpc DeleteCategory(DeleteCategoryRequest) returns (google.protobuf.Empty);
+}
+
+message Category {
+    string id = 1;
+    string slug = 2;
+    string name = 3;
+    string icon = 4;
+    google.protobuf.Timestamp created_at = 5;
+    google.protobuf.Timestamp updated_at = 6;
+}
+
+message ListCategoriesResponse {
+    repeated Category categories = 1;
+}
+
+message CreateCategoryRequest {
+    string name = 1;
+    string slug = 2;
+    string icon = 3;
+}
+
+message UpdateCategoryRequest {
+    string id = 1;
+    string name = 2;
+    string slug = 3;
+    string icon = 4;
+}
+
+message DeleteCategoryRequest {
+    string id = 1;
+}
