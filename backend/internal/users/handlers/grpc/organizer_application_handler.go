@@ -41,7 +41,7 @@ func (h *OrganizerApplicationGrpcHandler) VerifyEmailOtp(ctx context.Context, re
 }
 
 func (h *OrganizerApplicationGrpcHandler) SubmitApplication(ctx context.Context, req *users.SubmitApplicationRequest) (*users.OrganizerApplication, error) {
-	application, err := h.applicationSvc.Submit(ctx, req.GetUserId(), req.GetVerificationToken(), req.GetOrganizationName(), req.GetDescription())
+	application, err := h.applicationSvc.Submit(ctx, req.GetUserId(), req.GetVerificationToken(), req.GetOrganizationName(), req.GetDescription(), req.GetAvatarContent())
 	if err != nil {
 		return nil, err
 	}
@@ -103,6 +103,7 @@ func toApplicationResponse(application *models.OrganizerApplication) *users.Orga
 		OrganizationName:  application.OrganizationName,
 		OrganizationEmail: application.OrganizationEmail,
 		Description:       application.Description,
+		AvatarUrl:         application.AvatarUrl,
 		Status:            users.ApplicationStatus(users.ApplicationStatus_value[string(application.Status)]),
 		CreatedAt:         timestamppb.New(application.CreatedAt),
 	}

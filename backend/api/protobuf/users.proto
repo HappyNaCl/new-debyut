@@ -29,6 +29,7 @@ service OrganizationService {
     rpc UpdateOrganizationAvatar(UpdateOrganizationAvatarRequest) returns (Organization);
     rpc ListMembers(OrganizationRequest) returns (ListMembersResponse);
     rpc RemoveMember(RemoveMemberRequest) returns (google.protobuf.Empty);
+    rpc SetMemberStatus(SetMemberStatusRequest) returns (OrganizationMember);
     rpc CreateInvitation(CreateInvitationRequest) returns (Invitation);
     rpc ListInvitations(OrganizationRequest) returns (ListInvitationsResponse);
     rpc RevokeInvitation(InvitationActionRequest) returns (google.protobuf.Empty);
@@ -80,6 +81,7 @@ message OrganizerApplication {
     google.protobuf.Timestamp reviewed_at = 8;
     google.protobuf.Timestamp created_at = 9;
     string organization_id = 10;
+    string avatar_url = 11;
 }
 
 message RequestEmailOtpRequest {
@@ -102,6 +104,7 @@ message SubmitApplicationRequest {
     string verification_token = 2;
     string organization_name = 3;
     string description = 4;
+    bytes avatar_content = 5;
 }
 
 message ListMyApplicationsRequest {
@@ -141,6 +144,12 @@ message Organization {
     string avatar_url = 8;
 }
 
+enum MemberStatus {
+    MEMBER_STATUS_UNSPECIFIED = 0;
+    MEMBER_ACTIVE = 1;
+    MEMBER_INACTIVE = 2;
+}
+
 message OrganizationMember {
     string organization_id = 1;
     string user_id = 2;
@@ -148,6 +157,7 @@ message OrganizationMember {
     string surname = 4;
     MemberRole role = 5;
     google.protobuf.Timestamp joined_at = 6;
+    MemberStatus status = 7;
 }
 
 message ListMyOrganizationsRequest {
@@ -196,6 +206,13 @@ message RemoveMemberRequest {
     string organization_id = 1;
     string actor_id = 2;
     string user_id = 3;
+}
+
+message SetMemberStatusRequest {
+    string organization_id = 1;
+    string actor_id = 2;
+    string user_id = 3;
+    MemberStatus status = 4;
 }
 
 enum InvitationStatus {

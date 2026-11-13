@@ -2,6 +2,7 @@
   import "../../../styles/admin.sass";
   import axios from "axios";
   import AdminLayout from "../admin/AdminLayout.svelte";
+  import Avatar from "../ui/Avatar.svelte";
   import Pagination from "../ui/Pagination.svelte";
   import Spinner from "../ui/Spinner.svelte";
   import StatusBadge from "../ui/StatusBadge.svelte";
@@ -108,6 +109,7 @@
       <ul class="item-list">
         {#each applications.data.applications as application (application.id)}
           <li class="item-row application-row">
+            <Avatar name={application.organizationName} src={application.avatarUrl} shape="rounded" size={44} />
             <div class="item-text">
               <span class="item-title">{application.organizationName}</span>
               <span class="item-detail">{application.organizationEmail}</span>

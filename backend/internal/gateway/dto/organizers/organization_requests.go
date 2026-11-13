@@ -5,6 +5,10 @@ type CreateInvitationRequest struct {
 	Role  string `json:"role"  binding:"required,oneof=OWNER STAFF"`
 }
 
+type SetMemberStatusRequest struct {
+	Status string `json:"status" binding:"required,oneof=ACTIVE INACTIVE"`
+}
+
 type UpdateOrganizationRequest struct {
 	Name        string `json:"name"        binding:"required,max=150"`
 	Description string `json:"description" binding:"required,max=2000"`

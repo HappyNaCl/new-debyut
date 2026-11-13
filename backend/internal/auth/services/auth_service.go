@@ -3,11 +3,13 @@ package services
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"time"
 
 	"github.com/HappyNaCl/new-debyut/internal/apperrors"
 	"github.com/HappyNaCl/new-debyut/internal/auth/models"
 	"github.com/HappyNaCl/new-debyut/internal/auth/repositories"
+	"github.com/HappyNaCl/new-debyut/internal/common/emails"
 	l "github.com/HappyNaCl/new-debyut/internal/common/logger"
 	"github.com/HappyNaCl/new-debyut/internal/common/otp"
 	"github.com/HappyNaCl/new-debyut/internal/common/rabbitmq"
@@ -52,6 +54,7 @@ func NewAuthService(
 }
 
 func (a *AuthService) RequestRegisterOtp(ctx context.Context, email string) error {
+	email = emails.Normalize(email)
 	if _, err := a.credentialRepository.GetByEmail(ctx, email); err == nil {
 		return apperrors.ErrEmailAlreadyExists
 	}
@@ -59,6 +62,7 @@ func (a *AuthService) RequestRegisterOtp(ctx context.Context, email string) erro
 }
 
 func (a *AuthService) VerifyRegisterOtp(ctx context.Context, email, code string) (string, error) {
+	email = emails.Normalize(email)
 	valid, err := a.registerOtpCache.Verify(ctx, email, code)
 	if err != nil {
 		return "", err
@@ -126,6 +130,7 @@ func (a *AuthService) CompleteRegistration(ctx context.Context, req *auth.Comple
 }
 
 func (a *AuthService) RequestLoginOtp(ctx context.Context, email string) error {
+	email = emails.Normalize(email)
 	if _, err := a.credentialRepository.GetByEmail(ctx, email); err != nil {
 		return apperrors.ErrAccountNotFound
 	}
@@ -133,6 +138,7 @@ func (a *AuthService) RequestLoginOtp(ctx context.Context, email string) error {
 }
 
 func (a *AuthService) VerifyLoginOtp(ctx context.Context, email, code string) (*AuthResult, error) {
+	email = emails.Normalize(email)
 	valid, err := a.loginOtpCache.Verify(ctx, email, code)
 	if err != nil {
 		return nil, err
@@ -151,6 +157,19 @@ func (a *AuthService) VerifyLoginOtp(ctx context.Context, email, code string) (*
 		return nil, err
 	}
 	return &AuthResult{Credential: credential, TokenPair: pair}, nil
+}
+
+// FindUserByEmail looks up a registered account by email. found is false
+// (with a nil error) when no account uses the address.
+func (a *AuthService) FindUserByEmail(ctx context.Context, email string) (*models.UserCredential, bool, error) {
+	credential, err := a.credentialRepository.GetByEmail(ctx, emails.Normalize(email))
+	if errors.Is(err, apperrors.ErrInvalidCredentials) {
+		return nil, false, nil
+	}
+	if err != nil {
+		return nil, false, err
+	}
+	return credential, true, nil
 }
 
 func (a *AuthService) SetOrganizerStatus(ctx context.Context, userId string, isOrganizer bool) error {

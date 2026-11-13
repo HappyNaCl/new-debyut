@@ -1,6 +1,7 @@
 package dto
 
 import (
+	"strings"
 	"time"
 
 	"github.com/HappyNaCl/new-debyut/internal/genproto/users"
@@ -38,6 +39,7 @@ type MemberResponse struct {
 	FirstName string    `json:"firstName"`
 	Surname   string    `json:"surname"`
 	Role      string    `json:"role"`
+	Status    string    `json:"status"`
 	JoinedAt  time.Time `json:"joinedAt"`
 }
 
@@ -68,6 +70,7 @@ func NewMemberResponse(res *users.OrganizationMember) *MemberResponse {
 		FirstName: res.GetFirstName(),
 		Surname:   res.GetSurname(),
 		Role:      res.GetRole().String(),
+		Status:    strings.TrimPrefix(res.GetStatus().String(), "MEMBER_"),
 		JoinedAt:  res.GetJoinedAt().AsTime(),
 	}
 }

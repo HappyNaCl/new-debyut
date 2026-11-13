@@ -41,7 +41,7 @@
     </span>
   </a>
   {#if isOwner}
-    <a href={`#${base}/invitations`} class="stat-card">
+    <a href={`#${base}/members`} class="stat-card">
       <span class="item-icon"><PersonAdd size={22} /></span>
       <span class="stat-text">
         <span class="stat-value">{invitations.data?.length ?? "–"}</span>

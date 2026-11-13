@@ -1,4 +1,5 @@
 export type MemberRole = "OWNER" | "STAFF";
+export type MemberStatus = "ACTIVE" | "INACTIVE";
 
 export interface Organization {
   id: string;
@@ -26,5 +27,6 @@ export interface OrganizationMember {
   firstName: string;
   surname: string;
   role: MemberRole;
+  status: MemberStatus;
   joinedAt: string;
 }

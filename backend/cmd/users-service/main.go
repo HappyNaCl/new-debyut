@@ -8,11 +8,13 @@ import (
 
 	"github.com/HappyNaCl/new-debyut/internal/common/cache"
 	"github.com/HappyNaCl/new-debyut/internal/common/database"
+	"github.com/HappyNaCl/new-debyut/internal/common/grpcclient"
 	l "github.com/HappyNaCl/new-debyut/internal/common/logger"
 	"github.com/HappyNaCl/new-debyut/internal/common/otp"
 	"github.com/HappyNaCl/new-debyut/internal/common/rabbitmq"
 	"github.com/HappyNaCl/new-debyut/internal/common/storage"
 	topics "github.com/HappyNaCl/new-debyut/internal/constants"
+	"github.com/HappyNaCl/new-debyut/internal/genproto/auth"
 	"github.com/HappyNaCl/new-debyut/internal/users/handlers/consumers"
 	"github.com/HappyNaCl/new-debyut/internal/users/repositories"
 	"github.com/HappyNaCl/new-debyut/internal/users/services"
@@ -59,10 +61,17 @@ func main() {
 	applicationRepository := repositories.NewOrganizerApplicationRepository(db)
 	emailOtpCache := otp.NewCache(redis, "organization-email")
 	emailTokenCache := repositories.NewOrganizationEmailTokenCache(redis)
-	applicationService := services.NewOrganizerApplicationService(applicationRepository, emailOtpCache, emailTokenCache, publisher)
 	organizationRepository := repositories.NewOrganizationRepository(db)
+	applicationService := services.NewOrganizerApplicationService(applicationRepository, organizationRepository, emailOtpCache, emailTokenCache, publisher, store)
 	invitationRepository := repositories.NewInvitationRepository(db)
-	organizationService := services.NewOrganizationService(organizationRepository, invitationRepository, userRepository, publisher, store)
+	authConn, err := grpcclient.NewGrpcClient(os.Getenv("AUTH_SERVICE_ADDR"))
+	if err != nil {
+		l.Logger.Fatal("Failed to connect to auth service: " + err.Error())
+	}
+	defer authConn.Close()
+	accounts := services.NewAuthAccountDirectory(auth.NewAuthServiceClient(authConn))
+
+	organizationService := services.NewOrganizationService(organizationRepository, invitationRepository, userRepository, accounts, publisher, store)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

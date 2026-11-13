@@ -6,9 +6,11 @@ import (
 	"strings"
 
 	"github.com/HappyNaCl/new-debyut/internal/apperrors"
+	"github.com/HappyNaCl/new-debyut/internal/common/emails"
 	"github.com/HappyNaCl/new-debyut/internal/common/otp"
 	"github.com/HappyNaCl/new-debyut/internal/common/rabbitmq"
 	"github.com/HappyNaCl/new-debyut/internal/common/snowflake"
+	"github.com/HappyNaCl/new-debyut/internal/common/storage"
 	"github.com/HappyNaCl/new-debyut/internal/common/tokens"
 	topics "github.com/HappyNaCl/new-debyut/internal/constants"
 	"github.com/HappyNaCl/new-debyut/internal/events"
@@ -22,29 +24,43 @@ const (
 )
 
 type OrganizerApplicationService struct {
-	applicationRepository *repositories.OrganizerApplicationRepository
-	emailOtpCache         *otp.Cache
-	emailTokenCache       *repositories.OrganizationEmailTokenCache
-	publisher             *rabbitmq.Publisher
+	applicationRepository  *repositories.OrganizerApplicationRepository
+	organizationRepository *repositories.OrganizationRepository
+	emailOtpCache          *otp.Cache
+	emailTokenCache        *repositories.OrganizationEmailTokenCache
+	publisher              *rabbitmq.Publisher
+	storage                *storage.Client
 }
 
 func NewOrganizerApplicationService(
 	applicationRepository *repositories.OrganizerApplicationRepository,
+	organizationRepository *repositories.OrganizationRepository,
 	emailOtpCache *otp.Cache,
 	emailTokenCache *repositories.OrganizationEmailTokenCache,
 	publisher *rabbitmq.Publisher,
+	storage *storage.Client,
 ) *OrganizerApplicationService {
 	return &OrganizerApplicationService{
-		applicationRepository: applicationRepository,
-		emailOtpCache:         emailOtpCache,
-		emailTokenCache:       emailTokenCache,
-		publisher:             publisher,
+		applicationRepository:  applicationRepository,
+		organizationRepository: organizationRepository,
+		emailOtpCache:          emailOtpCache,
+		emailTokenCache:        emailTokenCache,
+		publisher:              publisher,
+		storage:                storage,
 	}
 }
 
 func (s *OrganizerApplicationService) RequestEmailOtp(ctx context.Context, userId, email string) error {
-	email = normalizeEmail(email)
+	email = emails.Normalize(email)
 	key := emailOtpKey(userId, email)
+
+	emailInUse, err := s.organizationRepository.EmailInUse(ctx, email)
+	if err != nil {
+		return err
+	}
+	if emailInUse {
+		return apperrors.ErrOrganizationEmailTaken
+	}
 
 	onCooldown, err := s.emailOtpCache.OnCooldown(ctx, key)
 	if err != nil {
@@ -67,7 +83,7 @@ func (s *OrganizerApplicationService) RequestEmailOtp(ctx context.Context, userI
 }
 
 func (s *OrganizerApplicationService) VerifyEmailOtp(ctx context.Context, userId, email, code string) (string, error) {
-	email = normalizeEmail(email)
+	email = emails.Normalize(email)
 
 	valid, err := s.emailOtpCache.Verify(ctx, emailOtpKey(userId, email), code)
 	if err != nil {
@@ -87,7 +103,7 @@ func (s *OrganizerApplicationService) VerifyEmailOtp(ctx context.Context, userId
 	return verificationToken, nil
 }
 
-func (s *OrganizerApplicationService) Submit(ctx context.Context, userId, verificationToken, organizationName, description string) (*models.OrganizerApplication, error) {
+func (s *OrganizerApplicationService) Submit(ctx context.Context, userId, verificationToken, organizationName, description string, avatarContent []byte) (*models.OrganizerApplication, error) {
 	verified, err := s.emailTokenCache.Get(ctx, verificationToken)
 	if err != nil || verified.UserId != userId {
 		return nil, apperrors.ErrOrganizationEmailNotVerified
@@ -101,15 +117,42 @@ func (s *OrganizerApplicationService) Submit(ctx context.Context, userId, verifi
 		return nil, apperrors.ErrApplicationAlreadyPending
 	}
 
+	organizationName = strings.TrimSpace(organizationName)
+	nameInUse, err := s.organizationRepository.NameInUse(ctx, organizationName, "")
+	if err != nil {
+		return nil, err
+	}
+	if nameInUse {
+		return nil, apperrors.ErrOrganizationNameTaken
+	}
+	emailInUse, err := s.organizationRepository.EmailInUse(ctx, verified.Email)
+	if err != nil {
+		return nil, err
+	}
+	if emailInUse {
+		return nil, apperrors.ErrOrganizationEmailTaken
+	}
+
+	applicationId := snowflake.Generate()
+	avatarUrl := ""
+	if len(avatarContent) > 0 {
+		avatarUrl, err = uploadAvatar(ctx, s.storage, "applications", applicationId, avatarContent)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	application := &models.OrganizerApplication{
-		Id:                snowflake.Generate(),
+		Id:                applicationId,
 		UserId:            userId,
 		OrganizationName:  organizationName,
 		OrganizationEmail: verified.Email,
 		Description:       description,
+		AvatarUrl:         avatarUrl,
 		Status:            models.ApplicationStatusPending,
 	}
 	if err := s.applicationRepository.Create(ctx, application); err != nil {
+		deleteAvatar(ctx, s.storage, avatarUrl)
 		return nil, err
 	}
 
@@ -162,10 +205,6 @@ func publishOrganizerStatus(ctx context.Context, publisher *rabbitmq.Publisher, 
 
 func emailOtpKey(userId, email string) string {
 	return userId + ":" + email
-}
-
-func normalizeEmail(email string) string {
-	return strings.ToLower(strings.TrimSpace(email))
 }
 
 func normalizePage(page, pageSize int) (int, int) {

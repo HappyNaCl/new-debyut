@@ -2,7 +2,12 @@ import { createQuery } from "@tanstack/svelte-query";
 import { api } from "./client";
 import type { ApiResponse } from "../types/api";
 import type { CreateInvitationPayload, Invitation } from "../types/invitation";
-import type { Organization, OrganizationMember, UpdateOrganizationPayload } from "../types/organization";
+import type {
+  MemberStatus,
+  Organization,
+  OrganizationMember,
+  UpdateOrganizationPayload,
+} from "../types/organization";
 
 export const organizationsQueryKey = ["organizations"] as const;
 export const myOrganizationsQueryKey = [...organizationsQueryKey, "me"] as const;
@@ -31,6 +36,13 @@ export async function uploadOrganizationAvatar(id: string, file: File) {
 
 export async function listMembers(id: string) {
   const response = await api.get<ApiResponse<OrganizationMember[]>>(`/organizations/${id}/members`);
+  return response.data.data;
+}
+
+export async function setMemberStatus(id: string, userId: string, status: MemberStatus) {
+  const response = await api.put<ApiResponse<OrganizationMember>>(`/organizations/${id}/members/${userId}/status`, {
+    status,
+  });
   return response.data.data;
 }
 

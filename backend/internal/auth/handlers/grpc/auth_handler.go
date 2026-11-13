@@ -87,6 +87,21 @@ func (h *AuthGrpcHandler) Logout(ctx context.Context, req *auth.LogoutRequest) (
 	return &emptypb.Empty{}, nil
 }
 
+func (h *AuthGrpcHandler) FindUserByEmail(ctx context.Context, req *auth.EmailRequest) (*auth.FindUserResponse, error) {
+	credential, found, err := h.authSvc.FindUserByEmail(ctx, req.GetEmail())
+	if err != nil {
+		return nil, err
+	}
+	if !found {
+		return &auth.FindUserResponse{}, nil
+	}
+	return &auth.FindUserResponse{
+		Found: true,
+		Id:    credential.Id,
+		Role:  auth.Role(auth.Role_value[string(credential.Role)]),
+	}, nil
+}
+
 func toAuthResponse(result *services.AuthResult) *auth.AuthenticationResponse {
 	cred := result.Credential
 

@@ -25,6 +25,14 @@ var (
 	ErrMemberNotFound       = status.Error(codes.NotFound, "This user is not a member of the organization.")
 	ErrLastOwner            = status.Error(codes.FailedPrecondition, "An organization must keep at least one owner.")
 	ErrInvalidMemberRole    = status.Error(codes.InvalidArgument, "Member role must be OWNER or STAFF.")
+	ErrInvalidMemberStatus  = status.Error(codes.InvalidArgument, "Member status must be ACTIVE or INACTIVE.")
+	ErrChangeOwnStatus      = status.Error(codes.FailedPrecondition, "You can't change your own status.")
+	ErrLastActiveOwner      = status.Error(codes.FailedPrecondition, "An organization must keep at least one active owner.")
+	ErrInviteeNotRegistered = status.Error(codes.FailedPrecondition, "No debyut account uses this email. Ask them to sign up first.")
+	ErrInviteeIsAdmin       = status.Error(codes.FailedPrecondition, "Admin accounts can't join organizations.")
+
+	ErrOrganizationNameTaken  = status.Error(codes.AlreadyExists, "An organization with this name already exists.")
+	ErrOrganizationEmailTaken = status.Error(codes.AlreadyExists, "An organization already uses this email.")
 )
 
 var (

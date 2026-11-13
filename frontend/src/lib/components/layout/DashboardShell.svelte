@@ -190,10 +190,6 @@
     </header>
 
     <div class="content">
-      <nav class="breadcrumb" aria-label="Breadcrumb">
-        <span class="breadcrumb-here">You are here</span>
-        <span class="breadcrumb-trail">{area} / {title}</span>
-      </nav>
       {@render children()}
     </div>
   </div>
@@ -470,31 +466,7 @@
     flex-direction: column
     gap: 16px
     width: 100%
-    max-width: 1280px
     padding: 24px 32px 64px
-
-  .breadcrumb
-    display: flex
-    align-items: stretch
-    overflow: hidden
-    border: 1px solid var(--color-border)
-    border-radius: 8px
-    background: var(--color-surface)
-    font-size: 12px
-
-  .breadcrumb-here
-    flex-shrink: 0
-    padding: 8px 14px
-    background: var(--color-surface-muted)
-    font-weight: 700
-    color: var(--color-text)
-
-  .breadcrumb-trail
-    overflow: hidden
-    padding: 8px 14px
-    white-space: nowrap
-    text-overflow: ellipsis
-    color: var(--color-text-muted)
 
   @media (min-width: 901px)
     .collapsed
