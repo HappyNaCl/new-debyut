@@ -28,6 +28,7 @@ func NewOrganizerApplicationHttpHandler(applicationClient users.OrganizerApplica
 // @Failure      400  {object}  object{error=object}  "Validation error"
 // @Failure      401  {object}  object{error=string}  "Missing or invalid access token"
 // @Failure      403  {object}  object{error=string}  "Admins cannot apply"
+// @Failure      409  {object}  object{error=object}  "An organization or pending application already uses this email"
 // @Failure      429  {object}  object{error=string}  "OTP requested too recently"
 // @Router       /organizer-applications/email [post]
 func (h OrganizerApplicationHttpHandler) RequestEmailOtp(c *gin.Context) {
@@ -41,7 +42,7 @@ func (h OrganizerApplicationHttpHandler) RequestEmailOtp(c *gin.Context) {
 		UserId: c.GetString("userId"),
 		Email:  req.Email,
 	}); err != nil {
-		respondError(c, err)
+		respondOrganizationError(c, err, "", "email")
 		return
 	}
 
@@ -83,21 +84,33 @@ func (h OrganizerApplicationHttpHandler) VerifyEmailOtp(c *gin.Context) {
 // @Summary      Submit the organizer application (step 3 — Work with us)
 // @Description  Submits the application for admin review using the verified organization email. Users and existing organizers can apply (an organizer applies to create another organization). A user may have one pending application at a time and can apply again after a decline.
 // @Tags         Organizer Applications
-// @Accept       json
+// @Accept       multipart/form-data
 // @Produce      json
 // @Security     BearerAuth
-// @Param        request  body      dto.SubmitApplicationRequest  true  "Verification token and organization details"
+// @Param        verificationToken  formData  string  true   "Verification token from step 2"
+// @Param        organizationName   formData  string  true   "Organization name"
+// @Param        description        formData  string  true   "Organization description"
+// @Param        avatar             formData  file    false  "Organization avatar (JPG, PNG or WebP, up to 2 MB)"
 // @Success      201  {object}  object{data=dto.ApplicationResponse}
 // @Failure      400  {object}  object{error=object}  "Validation error, or email verification expired"
 // @Failure      401  {object}  object{error=string}  "Missing or invalid access token"
 // @Failure      403  {object}  object{error=string}  "Admins cannot apply"
-// @Failure      409  {object}  object{error=string}  "An application is already pending"
+// @Failure      409  {object}  object{error=string}  "An application is already pending, or the name/email is already in use (field error)"
 // @Router       /organizer-applications [post]
 func (h OrganizerApplicationHttpHandler) Submit(c *gin.Context) {
 	var req dto.SubmitApplicationRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": validate.ParseErrors(err)})
 		return
+	}
+
+	var avatarContent []byte
+	if _, err := c.FormFile("avatar"); err == nil {
+		content, ok := readAvatar(c)
+		if !ok {
+			return
+		}
+		avatarContent = content
 	}
 
 	res, err := h.applicationClient.SubmitApplication(c, &users.SubmitApplicationRequest{
@@ -105,9 +118,10 @@ func (h OrganizerApplicationHttpHandler) Submit(c *gin.Context) {
 		VerificationToken: req.VerificationToken,
 		OrganizationName:  req.OrganizationName,
 		Description:       req.Description,
+		AvatarContent:     avatarContent,
 	})
 	if err != nil {
-		respondError(c, err)
+		respondOrganizationError(c, err, "organizationName", "organizationEmail")
 		return
 	}
 
@@ -175,6 +189,7 @@ func (h OrganizerApplicationHttpHandler) List(c *gin.Context) {
 // @Failure      401  {object}  object{error=string}  "Missing or invalid access token"
 // @Failure      403  {object}  object{error=string}  "Not an admin"
 // @Failure      404  {object}  object{error=string}  "Application not found"
+// @Failure      409  {object}  object{error=string}  "An organization with this name or email already exists"
 // @Router       /admin/organizer-applications/{id}/approve [post]
 func (h OrganizerApplicationHttpHandler) Approve(c *gin.Context) {
 	res, err := h.applicationClient.ApproveApplication(c, &users.ReviewApplicationRequest{

@@ -9,7 +9,6 @@
     EventNote,
     Gavel,
     Group,
-    PersonAdd,
     Settings,
   } from "@material-symbols-svg/svelte";
   import DashboardShell from "../layout/DashboardShell.svelte";
@@ -48,7 +47,6 @@
 
     const base = `/organizer/${selectedId}`;
     const access: DashboardLink[] = [{ href: `${base}/members`, label: "Members", icon: Group }];
-    if (myRole === "OWNER") access.push({ href: `${base}/invitations`, label: "Invitations", icon: PersonAdd });
 
     return [
       {
@@ -73,9 +71,8 @@
 
   let switchOptions = $derived<DashboardSwitchOption[]>(
     (organizations.data ?? []).map((option) => {
-      const ownersOnly = subPath === "/invitations" && option.myRole !== "OWNER";
       return {
-        href: `/organizer/${option.id}${ownersOnly ? "" : subPath}`,
+        href: `/organizer/${option.id}${subPath}`,
         label: option.name,
         caption: option.myRole ? roleLabels[option.myRole] : undefined,
         current: option.id === selectedId,

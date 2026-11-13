@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/HappyNaCl/new-debyut/internal/apperrors"
 	"github.com/HappyNaCl/new-debyut/internal/common/validate"
 	dto "github.com/HappyNaCl/new-debyut/internal/gateway/dto/organizers"
 	"github.com/HappyNaCl/new-debyut/internal/genproto/users"
@@ -47,6 +48,7 @@ func (h OrganizationHttpHandler) ListMine(c *gin.Context) {
 // @Failure      401  {object}  object{error=string}  "Missing or invalid access token"
 // @Failure      403  {object}  object{error=string}  "Not an owner"
 // @Failure      404  {object}  object{error=string}  "Organization not found"
+// @Failure      409  {object}  object{error=object}  "Name already in use"
 // @Router       /organizations/{id} [put]
 func (h OrganizationHttpHandler) Update(c *gin.Context) {
 	var req dto.UpdateOrganizationRequest
@@ -62,7 +64,7 @@ func (h OrganizationHttpHandler) Update(c *gin.Context) {
 		Description:    req.Description,
 	})
 	if err != nil {
-		respondError(c, err)
+		respondOrganizationError(c, err, "name", "")
 		return
 	}
 
@@ -148,7 +150,7 @@ func (h OrganizationHttpHandler) ListMembers(c *gin.Context) {
 }
 
 // @Summary      Invite someone to an organization (owners only)
-// @Description  Emails an invitation to join as OWNER or STAFF. The address does not need a debyut account yet. Invitations expire after 7 days; one pending invitation per email per organization.
+// @Description  Emails an invitation to join as OWNER or STAFF. The address must belong to a registered, non-admin debyut account that is not already a member. Invitations expire after 7 days; one pending invitation per email per organization. Problems with the email come back as a field error under "email".
 // @Tags         Organizations
 // @Accept       json
 // @Produce      json
@@ -156,11 +158,11 @@ func (h OrganizationHttpHandler) ListMembers(c *gin.Context) {
 // @Param        id       path      string                       true  "Organization ID"
 // @Param        request  body      dto.CreateInvitationRequest  true  "Invitee email and role"
 // @Success      201  {object}  object{data=dto.InvitationResponse}
-// @Failure      400  {object}  object{error=object}  "Validation error"
+// @Failure      400  {object}  object{error=object}  "Validation error, no account uses the email, or the account is an admin"
 // @Failure      401  {object}  object{error=string}  "Missing or invalid access token"
 // @Failure      403  {object}  object{error=string}  "Not an owner"
 // @Failure      404  {object}  object{error=string}  "Organization not found"
-// @Failure      409  {object}  object{error=string}  "This email already has a pending invitation"
+// @Failure      409  {object}  object{error=object}  "Already a member, or the email already has a pending invitation"
 // @Router       /organizations/{id}/invitations [post]
 func (h OrganizationHttpHandler) CreateInvitation(c *gin.Context) {
 	var req dto.CreateInvitationRequest
@@ -176,7 +178,12 @@ func (h OrganizationHttpHandler) CreateInvitation(c *gin.Context) {
 		Role:           users.MemberRole(users.MemberRole_value[req.Role]),
 	})
 	if err != nil {
-		respondError(c, err)
+		respondFieldError(c, err, map[error]string{
+			apperrors.ErrInviteeNotRegistered:     "email",
+			apperrors.ErrInviteeIsAdmin:           "email",
+			apperrors.ErrAlreadyMember:            "email",
+			apperrors.ErrInvitationAlreadyPending: "email",
+		})
 		return
 	}
 
@@ -324,6 +331,42 @@ func (h OrganizationHttpHandler) List(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": dto.NewOrganizationPageResponse(res)})
+}
+
+// @Summary      Activate or deactivate a member (owners only)
+// @Description  An inactive member keeps their membership but cannot access the organization until reactivated. Owners cannot change their own status, and the last active owner cannot be deactivated.
+// @Tags         Organizations
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id       path      string                      true  "Organization ID"
+// @Param        userId   path      string                      true  "User ID of the member"
+// @Param        request  body      dto.SetMemberStatusRequest  true  "New status"
+// @Success      200  {object}  object{data=dto.MemberResponse}
+// @Failure      400  {object}  object{error=object}  "Validation error, own status, or last active owner"
+// @Failure      401  {object}  object{error=string}  "Missing or invalid access token"
+// @Failure      403  {object}  object{error=string}  "Not an owner"
+// @Failure      404  {object}  object{error=string}  "Organization or member not found"
+// @Router       /organizations/{id}/members/{userId}/status [put]
+func (h OrganizationHttpHandler) SetMemberStatus(c *gin.Context) {
+	var req dto.SetMemberStatusRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": validate.ParseErrors(err)})
+		return
+	}
+
+	res, err := h.organizationClient.SetMemberStatus(c, &users.SetMemberStatusRequest{
+		OrganizationId: c.Param("id"),
+		ActorId:        c.GetString("userId"),
+		UserId:         c.Param("userId"),
+		Status:         users.MemberStatus(users.MemberStatus_value["MEMBER_"+req.Status]),
+	})
+	if err != nil {
+		respondError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": dto.NewMemberResponse(res)})
 }
 
 // @Summary      Remove a member, or leave an organization

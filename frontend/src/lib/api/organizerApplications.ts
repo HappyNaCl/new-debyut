@@ -23,7 +23,14 @@ export async function verifyOrganizationEmailOtp(email: string, otp: string) {
 }
 
 export async function submitApplication(payload: SubmitApplicationPayload) {
-  const response = await api.post<ApiResponse<OrganizerApplication>>("/organizer-applications", payload);
+  const form = new FormData();
+  form.append("verificationToken", payload.verificationToken);
+  form.append("organizationName", payload.organizationName);
+  form.append("description", payload.description);
+  if (payload.avatar) form.append("avatar", payload.avatar);
+  const response = await api.post<ApiResponse<OrganizerApplication>>("/organizer-applications", form, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
   return response.data.data;
 }
 

@@ -3,7 +3,6 @@ package repositories
 import (
 	"context"
 	"errors"
-	"strings"
 	"time"
 
 	"github.com/HappyNaCl/new-debyut/internal/apperrors"
@@ -54,7 +53,7 @@ func (r *InvitationRepository) ListPendingByEmail(ctx context.Context, email str
 	var invitations []models.OrganizationInvitation
 	err := r.db.WithContext(ctx).
 		Preload("Organization").
-		Where("email = ? AND status = ? AND expires_at > ?", strings.ToLower(email), models.InvitationStatusPending, time.Now().UTC()).
+		Where("email = ? AND status = ? AND expires_at > ?", email, models.InvitationStatusPending, time.Now().UTC()).
 		Order("created_at DESC").
 		Find(&invitations).Error
 	return invitations, err
@@ -75,7 +74,7 @@ func (r *InvitationRepository) Revoke(ctx context.Context, id, organizationId st
 
 func (r *InvitationRepository) Decline(ctx context.Context, id, email string) error {
 	result := r.db.WithContext(ctx).Model(&models.OrganizationInvitation{}).
-		Where("id = ? AND email = ? AND status = ? AND expires_at > ?", id, strings.ToLower(email), models.InvitationStatusPending, time.Now().UTC()).
+		Where("id = ? AND email = ? AND status = ? AND expires_at > ?", id, email, models.InvitationStatusPending, time.Now().UTC()).
 		Update("status", models.InvitationStatusDeclined)
 	if result.Error != nil {
 		return result.Error
@@ -90,7 +89,7 @@ func (r *InvitationRepository) Accept(ctx context.Context, id, userId, email str
 	var invitation models.OrganizationInvitation
 	err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
-			Where("id = ? AND email = ?", id, strings.ToLower(email)).
+			Where("id = ? AND email = ?", id, email).
 			First(&invitation).Error
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return apperrors.ErrInvitationNotFound
@@ -106,6 +105,7 @@ func (r *InvitationRepository) Accept(ctx context.Context, id, userId, email str
 			OrganizationId: invitation.OrganizationId,
 			UserId:         userId,
 			Role:           invitation.Role,
+			Status:         models.MemberStatusActive,
 		}).Error
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == "23505" {

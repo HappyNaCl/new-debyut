@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	_ "github.com/HappyNaCl/new-debyut/api/swagger"
 	grpcclient "github.com/HappyNaCl/new-debyut/internal/common/grpcclient"
@@ -35,7 +36,7 @@ func main() {
 	r := gin.Default()
 	r.Use(
 		cors.New(cors.Config{
-			AllowOrigins:     []string{"http://localhost:5173", "http://frontend:5173"},
+			AllowOrigins:     allowedOrigins(),
 			AllowMethods:     []string{"GET", "DELETE", "PUT", "POST", "OPTIONS"},
 			AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 			AllowCredentials: true,
@@ -81,4 +82,17 @@ func registerRoutes(api *gin.RouterGroup) {
 	routes.RegisterOrganizerApplicationRoutes(api, applicationClient)
 	routes.RegisterOrganizationRoutes(api, organizationClient)
 	routes.RegisterCategoryRoutes(api, eventClient)
+}
+
+// allowedOrigins returns the default local frontend origins plus any extra
+// comma-separated origins in CORS_ALLOWED_ORIGINS (e.g. a LAN address used to
+// open the dev frontend from another device).
+func allowedOrigins() []string {
+	origins := []string{"http://localhost:5173", "http://frontend:5173"}
+	for _, origin := range strings.Split(os.Getenv("CORS_ALLOWED_ORIGINS"), ",") {
+		if origin = strings.TrimSpace(origin); origin != "" {
+			origins = append(origins, origin)
+		}
+	}
+	return origins
 }

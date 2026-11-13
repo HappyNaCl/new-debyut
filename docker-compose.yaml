@@ -178,6 +178,21 @@ services:
     networks:
       - network
 
+  frontend:
+    container_name: new-debyut-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=${VITE_API_URL:-http://localhost:${API_GATEWAY_PORT:-8080}/api}
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - network
+
 networks:
   network:
 

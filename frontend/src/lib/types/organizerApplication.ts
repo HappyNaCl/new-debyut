@@ -6,6 +6,7 @@ export interface OrganizerApplication {
   organizationName: string;
   organizationEmail: string;
   description: string;
+  avatarUrl?: string;
   status: ApplicationStatus;
   reviewedBy?: string;
   reviewedAt?: string;
@@ -26,4 +27,5 @@ export interface SubmitApplicationPayload {
   verificationToken: string;
   organizationName: string;
   description: string;
+  avatar?: File | null;
 }

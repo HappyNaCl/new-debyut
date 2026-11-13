@@ -7,6 +7,7 @@ import (
 
 	"github.com/HappyNaCl/new-debyut/internal/apperrors"
 	"github.com/HappyNaCl/new-debyut/internal/users/models"
+	"github.com/jackc/pgx/v5/pgconn"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -27,7 +28,7 @@ func (r *OrganizationRepository) ListByMember(ctx context.Context, userId string
 		Table("organizations").
 		Select("organizations.*, organization_members.role").
 		Joins("JOIN organization_members ON organization_members.organization_id = organizations.id").
-		Where("organization_members.user_id = ?", userId).
+		Where("organization_members.user_id = ? AND organization_members.status = ?", userId, models.MemberStatusActive).
 		Order("organizations.created_at DESC").
 		Scan(&organizations).Error
 	return organizations, err
@@ -39,7 +40,7 @@ func (r *OrganizationRepository) GetForMember(ctx context.Context, organizationI
 		Table("organizations").
 		Select("organizations.*, organization_members.role").
 		Joins("JOIN organization_members ON organization_members.organization_id = organizations.id").
-		Where("organizations.id = ? AND organization_members.user_id = ?", organizationId, userId).
+		Where("organizations.id = ? AND organization_members.user_id = ? AND organization_members.status = ?", organizationId, userId, models.MemberStatusActive).
 		Limit(1).
 		Scan(&organizations).Error
 	if err != nil {
@@ -52,10 +53,52 @@ func (r *OrganizationRepository) GetForMember(ctx context.Context, organizationI
 }
 
 func (r *OrganizationRepository) Update(ctx context.Context, organizationId, name, description string) error {
-	return r.db.WithContext(ctx).
+	err := r.db.WithContext(ctx).
 		Model(&models.Organization{}).
 		Where("id = ?", organizationId).
 		Updates(map[string]any{"name": name, "description": description}).Error
+	return organizationConflictError(err)
+}
+
+// NameInUse reports whether another organization, or a pending organizer
+// application, already uses the name (case-insensitive).
+func (r *OrganizationRepository) NameInUse(ctx context.Context, name, excludeOrganizationId string) (bool, error) {
+	var inUse bool
+	err := r.db.WithContext(ctx).Raw(`
+		SELECT EXISTS (SELECT 1 FROM organizations WHERE lower(name) = lower(?) AND id <> ?)
+		    OR EXISTS (SELECT 1 FROM organizer_applications WHERE lower(organization_name) = lower(?) AND status = ?)`,
+		name, excludeOrganizationId, name, models.ApplicationStatusPending,
+	).Scan(&inUse).Error
+	return inUse, err
+}
+
+// EmailInUse reports whether an organization, or a pending organizer
+// application, already uses the email. Emails are stored normalized (see
+// emails.Normalize), so callers must pass a normalized email.
+func (r *OrganizationRepository) EmailInUse(ctx context.Context, email string) (bool, error) {
+	var inUse bool
+	err := r.db.WithContext(ctx).Raw(`
+		SELECT EXISTS (SELECT 1 FROM organizations WHERE email = ?)
+		    OR EXISTS (SELECT 1 FROM organizer_applications WHERE organization_email = ? AND status = ?)`,
+		email, email, models.ApplicationStatusPending,
+	).Scan(&inUse).Error
+	return inUse, err
+}
+
+// organizationConflictError maps unique-index violations on organization
+// names and emails (organizations and pending applications) to app errors.
+func organizationConflictError(err error) error {
+	var pgErr *pgconn.PgError
+	if !errors.As(err, &pgErr) || pgErr.Code != "23505" {
+		return err
+	}
+	switch pgErr.ConstraintName {
+	case "idx_organizations_name_lower", "idx_organizer_applications_pending_name":
+		return apperrors.ErrOrganizationNameTaken
+	case "idx_organizations_email", "idx_organizer_applications_pending_email":
+		return apperrors.ErrOrganizationEmailTaken
+	}
+	return err
 }
 
 func (r *OrganizationRepository) UpdateAvatar(ctx context.Context, organizationId, avatarUrl string) error {
@@ -69,7 +112,7 @@ func (r *OrganizationRepository) ListMembers(ctx context.Context, organizationId
 	var members []models.MemberProfile
 	err := r.db.WithContext(ctx).
 		Table("organization_members").
-		Select("organization_members.organization_id, organization_members.user_id, users.first_name, users.surname, organization_members.role, organization_members.created_at").
+		Select("organization_members.organization_id, organization_members.user_id, users.first_name, users.surname, organization_members.role, organization_members.status, organization_members.created_at").
 		Joins("LEFT JOIN users ON users.id = organization_members.user_id").
 		Where("organization_members.organization_id = ?", organizationId).
 		Order("organization_members.created_at ASC").
@@ -124,7 +167,7 @@ func (r *OrganizationRepository) RemoveMember(ctx context.Context, organizationI
 		var target *models.OrganizationMember
 		owners := 0
 		for index := range members {
-			if members[index].Role == models.MemberRoleOwner {
+			if isActiveOwner(&members[index]) {
 				owners++
 			}
 			if members[index].UserId == userId {
@@ -134,7 +177,7 @@ func (r *OrganizationRepository) RemoveMember(ctx context.Context, organizationI
 		if target == nil {
 			return apperrors.ErrMemberNotFound
 		}
-		if target.Role == models.MemberRoleOwner && owners <= 1 {
+		if isActiveOwner(target) && owners <= 1 {
 			return apperrors.ErrLastOwner
 		}
 
@@ -143,6 +186,47 @@ func (r *OrganizationRepository) RemoveMember(ctx context.Context, organizationI
 	})
 }
 
+// SetMemberStatus activates or deactivates a member. The last active owner
+// cannot be deactivated.
+func (r *OrganizationRepository) SetMemberStatus(ctx context.Context, organizationId, userId string, status models.MemberStatus) error {
+	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var members []models.OrganizationMember
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+			Where("organization_id = ?", organizationId).
+			Find(&members).Error; err != nil {
+			return err
+		}
+
+		var target *models.OrganizationMember
+		activeOwners := 0
+		for index := range members {
+			if isActiveOwner(&members[index]) {
+				activeOwners++
+			}
+			if members[index].UserId == userId {
+				target = &members[index]
+			}
+		}
+		if target == nil {
+			return apperrors.ErrMemberNotFound
+		}
+		if status == models.MemberStatusInactive && isActiveOwner(target) && activeOwners <= 1 {
+			return apperrors.ErrLastActiveOwner
+		}
+
+		return tx.Model(&models.OrganizationMember{}).
+			Where("organization_id = ? AND user_id = ?", organizationId, userId).
+			Update("status", status).Error
+	})
+}
+
+// CountMemberships counts the organizations where the user is an active member.
 func (r *OrganizationRepository) CountMemberships(ctx context.Context, userId string) (int64, error) {
-	return gorm.G[models.OrganizationMember](r.db).Where("user_id = ?", userId).Count(ctx, "user_id")
+	return gorm.G[models.OrganizationMember](r.db).
+		Where("user_id = ? AND status = ?", userId, models.MemberStatusActive).
+		Count(ctx, "user_id")
+}
+
+func isActiveOwner(member *models.OrganizationMember) bool {
+	return member.Role == models.MemberRoleOwner && member.Status == models.MemberStatusActive
 }

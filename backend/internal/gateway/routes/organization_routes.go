@@ -21,6 +21,7 @@ func RegisterOrganizationRoutes(
 	organizations.PUT("/:id/avatar", organizationHandler.UpdateAvatar)
 	organizations.GET("/:id/members", organizationHandler.ListMembers)
 	organizations.DELETE("/:id/members/:userId", organizationHandler.RemoveMember)
+	organizations.PUT("/:id/members/:userId/status", organizationHandler.SetMemberStatus)
 	organizations.POST("/:id/invitations", organizationHandler.CreateInvitation)
 	organizations.GET("/:id/invitations", organizationHandler.ListInvitations)
 	organizations.DELETE("/:id/invitations/:invitationId", organizationHandler.RevokeInvitation)

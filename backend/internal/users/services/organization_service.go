@@ -3,10 +3,12 @@ package services
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"strings"
 	"time"
 
 	"github.com/HappyNaCl/new-debyut/internal/apperrors"
+	"github.com/HappyNaCl/new-debyut/internal/common/emails"
 	l "github.com/HappyNaCl/new-debyut/internal/common/logger"
 	"github.com/HappyNaCl/new-debyut/internal/common/rabbitmq"
 	"github.com/HappyNaCl/new-debyut/internal/common/snowflake"
@@ -24,6 +26,7 @@ type OrganizationService struct {
 	organizationRepository *repositories.OrganizationRepository
 	invitationRepository   *repositories.InvitationRepository
 	userRepository         *repositories.UserRepository
+	accounts               AccountDirectory
 	publisher              *rabbitmq.Publisher
 	storage                *storage.Client
 }
@@ -32,6 +35,7 @@ func NewOrganizationService(
 	organizationRepository *repositories.OrganizationRepository,
 	invitationRepository *repositories.InvitationRepository,
 	userRepository *repositories.UserRepository,
+	accounts AccountDirectory,
 	publisher *rabbitmq.Publisher,
 	storage *storage.Client,
 ) *OrganizationService {
@@ -39,6 +43,7 @@ func NewOrganizationService(
 		organizationRepository: organizationRepository,
 		invitationRepository:   invitationRepository,
 		userRepository:         userRepository,
+		accounts:               accounts,
 		publisher:              publisher,
 		storage:                storage,
 	}
@@ -61,6 +66,17 @@ func (s *OrganizationService) Update(ctx context.Context, organizationId, actorI
 	organization, err := s.requireOwner(ctx, organizationId, actorId)
 	if err != nil {
 		return nil, err
+	}
+
+	name = strings.TrimSpace(name)
+	if !strings.EqualFold(name, organization.Name) {
+		nameInUse, err := s.organizationRepository.NameInUse(ctx, name, organizationId)
+		if err != nil {
+			return nil, err
+		}
+		if nameInUse {
+			return nil, apperrors.ErrOrganizationNameTaken
+		}
 	}
 
 	if err := s.organizationRepository.Update(ctx, organizationId, name, description); err != nil {
@@ -121,6 +137,44 @@ func (s *OrganizationService) RemoveMember(ctx context.Context, organizationId, 
 	return nil
 }
 
+// SetMemberStatus lets an owner activate or deactivate another member. A
+// deactivated member loses access to the organization; if it was their last
+// active membership they also lose the ORGANIZER role until reactivated.
+func (s *OrganizationService) SetMemberStatus(ctx context.Context, organizationId, actorId, userId string, status models.MemberStatus) (*models.MemberProfile, error) {
+	if status != models.MemberStatusActive && status != models.MemberStatusInactive {
+		return nil, apperrors.ErrInvalidMemberStatus
+	}
+	if actorId == userId {
+		return nil, apperrors.ErrChangeOwnStatus
+	}
+	if _, err := s.requireOwner(ctx, organizationId, actorId); err != nil {
+		return nil, err
+	}
+
+	if err := s.organizationRepository.SetMemberStatus(ctx, organizationId, userId, status); err != nil {
+		return nil, err
+	}
+
+	activeMemberships, err := s.organizationRepository.CountMemberships(ctx, userId)
+	if err != nil {
+		return nil, err
+	}
+	if err := publishOrganizerStatus(ctx, s.publisher, userId, activeMemberships > 0); err != nil {
+		return nil, err
+	}
+
+	members, err := s.organizationRepository.ListMembers(ctx, organizationId)
+	if err != nil {
+		return nil, err
+	}
+	for index := range members {
+		if members[index].UserId == userId {
+			return &members[index], nil
+		}
+	}
+	return nil, apperrors.ErrMemberNotFound
+}
+
 func (s *OrganizationService) CreateInvitation(ctx context.Context, organizationId, actorId, email string, role models.MemberRole) (*models.OrganizationInvitation, error) {
 	if role != models.MemberRoleOwner && role != models.MemberRoleStaff {
 		return nil, apperrors.ErrInvalidMemberRole
@@ -130,10 +184,27 @@ func (s *OrganizationService) CreateInvitation(ctx context.Context, organization
 		return nil, err
 	}
 
+	email = emails.Normalize(email)
+	account, err := s.accounts.FindByEmail(ctx, email)
+	if err != nil {
+		return nil, err
+	}
+	if account == nil {
+		return nil, apperrors.ErrInviteeNotRegistered
+	}
+	if account.IsAdmin {
+		return nil, apperrors.ErrInviteeIsAdmin
+	}
+	if _, err := s.organizationRepository.GetMember(ctx, organizationId, account.Id); err == nil {
+		return nil, apperrors.ErrAlreadyMember
+	} else if !errors.Is(err, apperrors.ErrMemberNotFound) {
+		return nil, err
+	}
+
 	invitation := &models.OrganizationInvitation{
 		Id:             snowflake.Generate(),
 		OrganizationId: organizationId,
-		Email:          normalizeEmail(email),
+		Email:          email,
 		Role:           role,
 		Status:         models.InvitationStatusPending,
 		InvitedBy:      actorId,
@@ -182,11 +253,11 @@ func (s *OrganizationService) RevokeInvitation(ctx context.Context, organization
 }
 
 func (s *OrganizationService) ListMyInvitations(ctx context.Context, email string) ([]models.OrganizationInvitation, error) {
-	return s.invitationRepository.ListPendingByEmail(ctx, email)
+	return s.invitationRepository.ListPendingByEmail(ctx, emails.Normalize(email))
 }
 
 func (s *OrganizationService) AcceptInvitation(ctx context.Context, invitationId, actorId, actorEmail string) (*models.MemberProfile, error) {
-	invitation, err := s.invitationRepository.Accept(ctx, invitationId, actorId, actorEmail)
+	invitation, err := s.invitationRepository.Accept(ctx, invitationId, actorId, emails.Normalize(actorEmail))
 	if err != nil {
 		return nil, err
 	}
@@ -207,7 +278,7 @@ func (s *OrganizationService) AcceptInvitation(ctx context.Context, invitationId
 }
 
 func (s *OrganizationService) DeclineInvitation(ctx context.Context, invitationId, actorEmail string) error {
-	return s.invitationRepository.Decline(ctx, invitationId, actorEmail)
+	return s.invitationRepository.Decline(ctx, invitationId, emails.Normalize(actorEmail))
 }
 
 func (s *OrganizationService) requireOwner(ctx context.Context, organizationId, actorId string) (*models.MembershipOrganization, error) {

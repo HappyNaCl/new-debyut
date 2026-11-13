@@ -23,7 +23,7 @@ func NewOrganizerApplicationRepository(db *gorm.DB) *OrganizerApplicationReposit
 }
 
 func (r *OrganizerApplicationRepository) Create(ctx context.Context, application *models.OrganizerApplication) error {
-	err := gorm.G[models.OrganizerApplication](r.db).Create(ctx, application)
+	err := organizationConflictError(gorm.G[models.OrganizerApplication](r.db).Create(ctx, application))
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) && pgErr.Code == "23505" {
 		return apperrors.ErrApplicationAlreadyPending
@@ -107,14 +107,16 @@ func (r *OrganizerApplicationRepository) Approve(ctx context.Context, id, review
 		organization.Name = application.OrganizationName
 		organization.Email = application.OrganizationEmail
 		organization.Description = application.Description
+		organization.AvatarUrl = application.AvatarUrl
 		if err := tx.Create(organization).Error; err != nil {
-			return err
+			return organizationConflictError(err)
 		}
 
 		owner := &models.OrganizationMember{
 			OrganizationId: organization.Id,
 			UserId:         application.UserId,
 			Role:           models.MemberRoleOwner,
+			Status:         models.MemberStatusActive,
 		}
 		if err := tx.Omit("Organization").Create(owner).Error; err != nil {
 			return err

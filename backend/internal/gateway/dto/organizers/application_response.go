@@ -12,6 +12,7 @@ type ApplicationResponse struct {
 	OrganizationName  string     `json:"organizationName"`
 	OrganizationEmail string     `json:"organizationEmail"`
 	Description       string     `json:"description"`
+	AvatarUrl         string     `json:"avatarUrl,omitempty"`
 	Status            string     `json:"status"`
 	ReviewedBy        string     `json:"reviewedBy,omitempty"`
 	ReviewedAt        *time.Time `json:"reviewedAt,omitempty"`
@@ -31,6 +32,7 @@ func NewApplicationResponse(res *users.OrganizerApplication) *ApplicationRespons
 		OrganizationName:  res.GetOrganizationName(),
 		OrganizationEmail: res.GetOrganizationEmail(),
 		Description:       res.GetDescription(),
+		AvatarUrl:         res.GetAvatarUrl(),
 		Status:            res.GetStatus().String(),
 		ReviewedBy:        res.GetReviewedBy(),
 		OrganizationId:    res.GetOrganizationId(),

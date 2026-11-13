@@ -13,6 +13,7 @@ service AuthService {
     rpc VerifyLoginOtp(VerifyOtpRequest) returns (AuthenticationResponse);
     rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse);
     rpc Logout(LogoutRequest) returns (google.protobuf.Empty);
+    rpc FindUserByEmail(EmailRequest) returns (FindUserResponse);
 }
 
 enum Role {
@@ -65,4 +66,10 @@ message AuthenticationResponse {
     Role role = 3;
     string access_token = 4;
     string refresh_token = 5;
+}
+
+message FindUserResponse {
+    bool found = 1;
+    string id = 2;
+    Role role = 3;
 }

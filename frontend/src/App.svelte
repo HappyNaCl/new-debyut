@@ -13,7 +13,6 @@
   import OrganizerDashboard from "./lib/components/pages/OrganizerDashboardPage.svelte";
   import OrganizerEvents from "./lib/components/pages/OrganizerEventsPage.svelte";
   import OrganizerMembers from "./lib/components/pages/OrganizerMembersPage.svelte";
-  import OrganizerInvitations from "./lib/components/pages/OrganizerInvitationsPage.svelte";
   import Invitations from "./lib/components/pages/InvitationsPage.svelte";
   import Tickets from "./lib/components/pages/TicketsPage.svelte";
   import Vod from "./lib/components/pages/VodPage.svelte";
@@ -66,7 +65,7 @@
     "/organizer/:id": wrap({ component: OrganizerDashboard, conditions: [isOrganizer] }),
     "/organizer/:id/events": wrap({ component: OrganizerEvents, conditions: [isOrganizer] }),
     "/organizer/:id/members": wrap({ component: OrganizerMembers, conditions: [isOrganizer] }),
-    "/organizer/:id/invitations": wrap({ component: OrganizerInvitations, conditions: [isOrganizer] }),
+    "/organizer/:id/invitations": wrap({ component: OrganizerMembers, conditions: [isOrganizer] }),
     "/organizer/:id/profile": wrap({ component: OrganizerProfile, conditions: [isOrganizer] }),
     "/organizer/:id/legal": wrap({ component: OrganizerLegal, conditions: [isOrganizer] }),
     "/organizer/:id/settings": wrap({ component: OrganizerSettings, conditions: [isOrganizer] }),

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"strings"
 
 	"github.com/HappyNaCl/new-debyut/internal/genproto/users"
 	"github.com/HappyNaCl/new-debyut/internal/users/models"
@@ -114,6 +115,15 @@ func (h *OrganizationGrpcHandler) RemoveMember(ctx context.Context, req *users.R
 	return &emptypb.Empty{}, nil
 }
 
+func (h *OrganizationGrpcHandler) SetMemberStatus(ctx context.Context, req *users.SetMemberStatusRequest) (*users.OrganizationMember, error) {
+	status := models.MemberStatus(strings.TrimPrefix(req.GetStatus().String(), "MEMBER_"))
+	member, err := h.organizationSvc.SetMemberStatus(ctx, req.GetOrganizationId(), req.GetActorId(), req.GetUserId(), status)
+	if err != nil {
+		return nil, err
+	}
+	return toMemberResponse(member), nil
+}
+
 func (h *OrganizationGrpcHandler) CreateInvitation(ctx context.Context, req *users.CreateInvitationRequest) (*users.Invitation, error) {
 	invitation, err := h.organizationSvc.CreateInvitation(ctx, req.GetOrganizationId(), req.GetActorId(), req.GetEmail(), models.MemberRole(req.GetRole().String()))
 	if err != nil {
@@ -182,6 +192,7 @@ func toMemberResponse(member *models.MemberProfile) *users.OrganizationMember {
 		FirstName:      member.FirstName,
 		Surname:        member.Surname,
 		Role:           toMemberRole(member.Role),
+		Status:         users.MemberStatus(users.MemberStatus_value["MEMBER_"+string(member.Status)]),
 		JoinedAt:       timestamppb.New(member.CreatedAt),
 	}
 }

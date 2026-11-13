@@ -14,7 +14,7 @@ type VerificationTokenResponse struct {
 }
 
 type SubmitApplicationRequest struct {
-	VerificationToken string `json:"verificationToken" binding:"required"`
-	OrganizationName  string `json:"organizationName"  binding:"required,max=150"`
-	Description       string `json:"description"       binding:"required,max=2000"`
+	VerificationToken string `form:"verificationToken" json:"verificationToken" binding:"required"`
+	OrganizationName  string `form:"organizationName"  json:"organizationName"  binding:"required,max=150"`
+	Description       string `form:"description"       json:"description"       binding:"required,max=2000"`
 }
