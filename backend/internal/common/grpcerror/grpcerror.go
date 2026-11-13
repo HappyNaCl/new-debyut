@@ -3,6 +3,7 @@ package grpcerror
 import (
 	"net/http"
 
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -35,4 +36,25 @@ func Message(err error) string {
 		return s.Message()
 	}
 	return err.Error()
+}
+
+// FieldViolations returns the field errors attached to a gRPC status as
+// errdetails.BadRequest, keyed by field. It returns nil when there are none.
+func FieldViolations(err error) map[string]string {
+	s, ok := status.FromError(err)
+	if !ok {
+		return nil
+	}
+	var fields map[string]string
+	for _, detail := range s.Details() {
+		if badRequest, ok := detail.(*errdetails.BadRequest); ok {
+			for _, violation := range badRequest.GetFieldViolations() {
+				if fields == nil {
+					fields = map[string]string{}
+				}
+				fields[violation.GetField()] = violation.GetDescription()
+			}
+		}
+	}
+	return fields
 }

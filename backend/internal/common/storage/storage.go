@@ -80,3 +80,10 @@ func (c *Client) DeleteByUrl(ctx context.Context, url string) error {
 	}
 	return c.client.RemoveObject(ctx, c.bucket, key, minio.RemoveObjectOptions{})
 }
+
+// HasKeyPrefix reports whether url points at an object this client stored
+// under the given key prefix (e.g. "events/123/").
+func (c *Client) HasKeyPrefix(url, prefix string) bool {
+	key, ok := strings.CutPrefix(url, c.publicUrl+"/")
+	return ok && strings.HasPrefix(key, prefix) && !strings.Contains(key, "..")
+}

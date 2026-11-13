@@ -62,6 +62,29 @@ func (h *OrganizationGrpcHandler) ListOrganizations(ctx context.Context, req *us
 	return response, nil
 }
 
+func (h *OrganizationGrpcHandler) GetOrganizationProfile(ctx context.Context, req *users.OrganizationProfileRequest) (*users.OrganizationProfile, error) {
+	organization, err := h.organizationSvc.GetProfile(ctx, req.GetOrganizationId())
+	if err != nil {
+		return nil, err
+	}
+	return &users.OrganizationProfile{Id: organization.Id, Name: organization.Name, AvatarUrl: organization.AvatarUrl}, nil
+}
+
+func (h *OrganizationGrpcHandler) ListOrganizationProfiles(ctx context.Context, req *users.ListOrganizationProfilesRequest) (*users.ListOrganizationProfilesResponse, error) {
+	organizations, err := h.organizationSvc.ListProfiles(ctx, req.GetOrganizationIds())
+	if err != nil {
+		return nil, err
+	}
+	response := &users.ListOrganizationProfilesResponse{Organizations: make([]*users.OrganizationProfile, 0, len(organizations))}
+	for index := range organizations {
+		organization := &organizations[index]
+		response.Organizations = append(response.Organizations, &users.OrganizationProfile{
+			Id: organization.Id, Name: organization.Name, AvatarUrl: organization.AvatarUrl,
+		})
+	}
+	return response, nil
+}
+
 func (h *OrganizationGrpcHandler) GetOrganization(ctx context.Context, req *users.OrganizationRequest) (*users.Organization, error) {
 	organization, err := h.organizationSvc.Get(ctx, req.GetOrganizationId(), req.GetActorId())
 	if err != nil {

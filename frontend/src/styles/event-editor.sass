@@ -1,0 +1,44 @@
+@use "tokens" as *
+@use "page" as *
+
+.event-editor-root
+  @include content-page
+  background: $surface-muted
+  // The sticky action bar spans the full window width (see EventForm).
+  overflow-x: clip
+
+  .page-content
+    max-width: 960px
+    gap: 20px
+    padding-bottom: 0
+
+  .editor-heading
+    display: flex
+    flex-direction: column
+    gap: 6px
+
+    h1
+      margin: 0
+      font-size: 26px
+      font-weight: 800
+
+  .back-link
+    display: inline-flex
+    align-items: center
+    gap: 4px
+    align-self: flex-start
+    font-size: 14px
+    font-weight: 700
+    color: $text-muted
+
+    &:hover
+      color: $primary
+      text-decoration: none
+
+  .organization-line
+    margin: 0
+    font-size: 14px
+    color: $text-muted
+
+    strong
+      color: $text

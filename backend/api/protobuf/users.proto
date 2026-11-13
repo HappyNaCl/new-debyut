@@ -25,6 +25,10 @@ service OrganizationService {
     rpc ListMyOrganizations(ListMyOrganizationsRequest) returns (ListOrganizationsResponse);
     rpc ListOrganizations(ListOrganizationsRequest) returns (ListOrganizationsResponse);
     rpc GetOrganization(OrganizationRequest) returns (Organization);
+    // Public: the name and logo shown on event pages. No membership needed.
+    rpc GetOrganizationProfile(OrganizationProfileRequest) returns (OrganizationProfile);
+    // Public: profiles for many organizations at once (unknown ids are skipped).
+    rpc ListOrganizationProfiles(ListOrganizationProfilesRequest) returns (ListOrganizationProfilesResponse);
     rpc UpdateOrganization(UpdateOrganizationRequest) returns (Organization);
     rpc UpdateOrganizationAvatar(UpdateOrganizationAvatarRequest) returns (Organization);
     rpc ListMembers(OrganizationRequest) returns (ListMembersResponse);
@@ -256,4 +260,22 @@ message ListMyInvitationsRequest {
 
 message ListInvitationsResponse {
     repeated Invitation invitations = 1;
+}
+
+message OrganizationProfileRequest {
+    string organization_id = 1;
+}
+
+message OrganizationProfile {
+    string id = 1;
+    string name = 2;
+    string avatar_url = 3;
+}
+
+message ListOrganizationProfilesRequest {
+    repeated string organization_ids = 1;
+}
+
+message ListOrganizationProfilesResponse {
+    repeated OrganizationProfile organizations = 1;
 }

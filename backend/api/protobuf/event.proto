@@ -10,6 +10,16 @@ service EventService {
     rpc CreateCategory(CreateCategoryRequest) returns (Category);
     rpc UpdateCategory(UpdateCategoryRequest) returns (Category);
     rpc DeleteCategory(DeleteCategoryRequest) returns (google.protobuf.Empty);
+
+    rpc UploadEventImage(UploadEventImageRequest) returns (UploadEventImageResponse);
+    rpc CreateEvent(SaveEventRequest) returns (Event);
+    rpc UpdateEvent(SaveEventRequest) returns (Event);
+    rpc GetEvent(GetEventRequest) returns (Event);
+    rpc ListEvents(ListEventsRequest) returns (ListEventsResponse);
+    // Public: only published events; drafts answer NotFound.
+    rpc GetPublishedEvent(GetPublishedEventRequest) returns (Event);
+    // Public: the most recently published events that haven't ended yet.
+    rpc ListLatestEvents(ListLatestEventsRequest) returns (ListEventsResponse);
 }
 
 message Category {
@@ -40,4 +50,106 @@ message UpdateCategoryRequest {
 
 message DeleteCategoryRequest {
     string id = 1;
+}
+
+// Events. Organization membership is checked by the API gateway before these
+// are called; the event service trusts organization_id and actor_id.
+
+message UploadEventImageRequest {
+    string organization_id = 1;
+    // BANNER, COVER or GALLERY
+    string kind = 2;
+    bytes content = 3;
+}
+
+message UploadEventImageResponse {
+    string url = 1;
+}
+
+message TicketType {
+    string id = 1;
+    // PAID, FREE or STREAMING (paid online viewing)
+    string kind = 2;
+    string name = 3;
+    string description = 4;
+    // Whole rupiah; 0 for FREE.
+    int64 price = 5;
+    int32 quantity = 6;
+    google.protobuf.Timestamp sales_start_at = 7;
+    google.protobuf.Timestamp sales_end_at = 8;
+}
+
+message EventInput {
+    string name = 1;
+    string category_id = 2;
+    string banner_url = 3;
+    string cover_url = 4;
+    repeated string gallery_urls = 5;
+    google.protobuf.Timestamp starts_at = 6;
+    google.protobuf.Timestamp ends_at = 7;
+    // 8 (location_type) and 12 (online_url) were removed: events happen at a
+    // venue, and online viewing is a STREAMING ticket hosted by debyut.
+    reserved 8, 12;
+    reserved "location_type", "online_url";
+    string venue_name = 9;
+    string address = 10;
+    string city = 11;
+    // Venue pin (WGS84). Set together or not at all.
+    optional double latitude = 20;
+    optional double longitude = 21;
+    // Rich text (HTML). Sanitized by the event service before it is stored.
+    string description = 13;
+    string contact_name = 14;
+    string contact_email = 15;
+    string contact_phone = 16;
+    // ORGANIZER or BUYER
+    string service_fee_bearer = 17;
+    repeated TicketType tickets = 18;
+    // Terms and agreement, rich text (HTML). Sanitized like the description.
+    string terms = 19;
+}
+
+message SaveEventRequest {
+    string organization_id = 1;
+    string actor_id = 2;
+    // Empty for CreateEvent.
+    string event_id = 3;
+    EventInput event = 4;
+    // false saves a draft; true publishes (and requires a complete event).
+    bool publish = 5;
+}
+
+message GetEventRequest {
+    string organization_id = 1;
+    string event_id = 2;
+}
+
+message ListEventsRequest {
+    string organization_id = 1;
+    // DRAFT, ACTIVE (published, not yet ended) or PAST (published, ended)
+    string filter = 2;
+}
+
+message Event {
+    string id = 1;
+    string organization_id = 2;
+    string status = 3;
+    EventInput details = 4;
+    string created_by = 5;
+    google.protobuf.Timestamp published_at = 6;
+    google.protobuf.Timestamp created_at = 7;
+    google.protobuf.Timestamp updated_at = 8;
+}
+
+message ListEventsResponse {
+    repeated Event events = 1;
+}
+
+message GetPublishedEventRequest {
+    string event_id = 1;
+}
+
+message ListLatestEventsRequest {
+    // 1-50; defaults to 8.
+    int32 limit = 1;
 }

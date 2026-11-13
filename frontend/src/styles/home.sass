@@ -1,24 +1,79 @@
 @use "tokens" as *
+@use "page" as *
 
 .home-root
   min-height: 100vh
   display: flex
   flex-direction: column
+  background: $surface-muted
+  @include page-elements
 
   .home-content
-    flex: 1
     display: flex
     flex-direction: column
-    align-items: center
-    justify-content: center
-    padding: 48px 16px
-    text-align: center
+    gap: 32px
+    width: 100%
+    max-width: 1200px
+    margin: 0 auto
+    padding: 40px 24px 96px
 
+  .home-intro
     h1
-      margin: 0 0 8px
+      margin: 0 0 6px
       font-size: 28px
       font-weight: 800
 
     p
       margin: 0
       color: $text-muted
+
+  .latest
+    display: flex
+    flex-direction: column
+    gap: 16px
+
+    h2
+      margin: 0
+      font-size: 20px
+      font-weight: 800
+
+  .event-grid
+    display: grid
+    grid-template-columns: repeat(4, minmax(0, 1fr))
+    gap: 20px
+    margin: 0
+    padding: 0
+    list-style: none
+
+  .skeleton
+    height: 300px
+    border-radius: 12px
+    background: linear-gradient(90deg, $surface 0%, $border 50%, $surface 100%)
+    background-size: 200% 100%
+    animation: home-skeleton 1.2s ease-in-out infinite
+    opacity: 0.6
+
+  @media (prefers-reduced-motion: reduce)
+    .skeleton
+      animation: none
+
+  @media (max-width: 1080px)
+    .event-grid
+      grid-template-columns: repeat(3, minmax(0, 1fr))
+
+  @media (max-width: 800px)
+    .event-grid
+      grid-template-columns: repeat(2, minmax(0, 1fr))
+
+  @media (max-width: 520px)
+    .home-content
+      padding: 24px 16px 64px
+
+    .event-grid
+      grid-template-columns: minmax(0, 1fr)
+
+@keyframes home-skeleton
+  from
+    background-position: 100% 0
+  to
+    background-position: -100% 0

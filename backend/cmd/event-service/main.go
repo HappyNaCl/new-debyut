@@ -1,9 +1,12 @@
 package main
 
 import (
+	"context"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/HappyNaCl/new-debyut/internal/common/storage"
 
 	"github.com/HappyNaCl/new-debyut/internal/common/cache"
 	"github.com/HappyNaCl/new-debyut/internal/common/database"
@@ -32,13 +35,20 @@ func main() {
 	categoryRepository := repositories.NewCategoryRepository(db)
 	categoryService := services.NewCategoryService(categoryRepository, redis)
 
+	store, err := storage.Connect(context.Background())
+	if err != nil {
+		l.Logger.Fatal("Failed to connect to object storage: " + err.Error())
+	}
+	eventRepository := repositories.NewEventRepository(db)
+	eventService := services.NewEventService(eventRepository, categoryRepository, store)
+
 	grpcServer := grpc.NewServer()
 	addr := os.Getenv("EVENT_SERVICE_ADDR")
 	go func() {
 		server := NewEventGrpcServer(addr)
 		l.Logger.Info("Event gRPC server is running on " + addr)
 
-		server.Run(grpcServer, categoryService)
+		server.Run(grpcServer, categoryService, eventService)
 	}()
 
 	quit := make(chan os.Signal, 1)

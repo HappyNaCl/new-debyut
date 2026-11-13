@@ -13,13 +13,15 @@ import (
 
 type EventGrpcHandler struct {
 	categorySvc *services.CategoryService
+	eventSvc    *services.EventService
 
 	event.UnimplementedEventServiceServer
 }
 
-func NewEventGrpcHandler(grpc *grpc.Server, categoryService *services.CategoryService) {
+func NewEventGrpcHandler(grpc *grpc.Server, categoryService *services.CategoryService, eventService *services.EventService) {
 	handler := &EventGrpcHandler{
 		categorySvc: categoryService,
+		eventSvc:    eventService,
 	}
 
 	event.RegisterEventServiceServer(grpc, handler)
