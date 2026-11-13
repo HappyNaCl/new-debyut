@@ -62,6 +62,21 @@ func (s *OrganizationService) Get(ctx context.Context, organizationId, actorId s
 	return s.organizationRepository.GetForMember(ctx, organizationId, actorId)
 }
 
+// GetProfile returns an organization's public profile (shown on event pages).
+func (s *OrganizationService) GetProfile(ctx context.Context, organizationId string) (*models.Organization, error) {
+	return s.organizationRepository.GetById(ctx, organizationId)
+}
+
+const maxProfilesPerRequest = 100
+
+// ListProfiles returns public profiles for the given organizations.
+func (s *OrganizationService) ListProfiles(ctx context.Context, organizationIds []string) ([]models.Organization, error) {
+	if len(organizationIds) > maxProfilesPerRequest {
+		organizationIds = organizationIds[:maxProfilesPerRequest]
+	}
+	return s.organizationRepository.ListByIds(ctx, organizationIds)
+}
+
 func (s *OrganizationService) Update(ctx context.Context, organizationId, actorId, name, description string) (*models.MembershipOrganization, error) {
 	organization, err := s.requireOwner(ctx, organizationId, actorId)
 	if err != nil {

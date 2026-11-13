@@ -82,6 +82,7 @@ func registerRoutes(api *gin.RouterGroup) {
 	routes.RegisterOrganizerApplicationRoutes(api, applicationClient)
 	routes.RegisterOrganizationRoutes(api, organizationClient)
 	routes.RegisterCategoryRoutes(api, eventClient)
+	routes.RegisterEventRoutes(api, eventClient, organizationClient)
 }
 
 // allowedOrigins returns the default local frontend origins plus any extra

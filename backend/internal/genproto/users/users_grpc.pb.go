@@ -532,6 +532,8 @@ const (
 	OrganizationService_ListMyOrganizations_FullMethodName      = "/OrganizationService/ListMyOrganizations"
 	OrganizationService_ListOrganizations_FullMethodName        = "/OrganizationService/ListOrganizations"
 	OrganizationService_GetOrganization_FullMethodName          = "/OrganizationService/GetOrganization"
+	OrganizationService_GetOrganizationProfile_FullMethodName   = "/OrganizationService/GetOrganizationProfile"
+	OrganizationService_ListOrganizationProfiles_FullMethodName = "/OrganizationService/ListOrganizationProfiles"
 	OrganizationService_UpdateOrganization_FullMethodName       = "/OrganizationService/UpdateOrganization"
 	OrganizationService_UpdateOrganizationAvatar_FullMethodName = "/OrganizationService/UpdateOrganizationAvatar"
 	OrganizationService_ListMembers_FullMethodName              = "/OrganizationService/ListMembers"
@@ -552,6 +554,10 @@ type OrganizationServiceClient interface {
 	ListMyOrganizations(ctx context.Context, in *ListMyOrganizationsRequest, opts ...grpc.CallOption) (*ListOrganizationsResponse, error)
 	ListOrganizations(ctx context.Context, in *ListOrganizationsRequest, opts ...grpc.CallOption) (*ListOrganizationsResponse, error)
 	GetOrganization(ctx context.Context, in *OrganizationRequest, opts ...grpc.CallOption) (*Organization, error)
+	// Public: the name and logo shown on event pages. No membership needed.
+	GetOrganizationProfile(ctx context.Context, in *OrganizationProfileRequest, opts ...grpc.CallOption) (*OrganizationProfile, error)
+	// Public: profiles for many organizations at once (unknown ids are skipped).
+	ListOrganizationProfiles(ctx context.Context, in *ListOrganizationProfilesRequest, opts ...grpc.CallOption) (*ListOrganizationProfilesResponse, error)
 	UpdateOrganization(ctx context.Context, in *UpdateOrganizationRequest, opts ...grpc.CallOption) (*Organization, error)
 	UpdateOrganizationAvatar(ctx context.Context, in *UpdateOrganizationAvatarRequest, opts ...grpc.CallOption) (*Organization, error)
 	ListMembers(ctx context.Context, in *OrganizationRequest, opts ...grpc.CallOption) (*ListMembersResponse, error)
@@ -597,6 +603,26 @@ func (c *organizationServiceClient) GetOrganization(ctx context.Context, in *Org
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Organization)
 	err := c.cc.Invoke(ctx, OrganizationService_GetOrganization_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *organizationServiceClient) GetOrganizationProfile(ctx context.Context, in *OrganizationProfileRequest, opts ...grpc.CallOption) (*OrganizationProfile, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(OrganizationProfile)
+	err := c.cc.Invoke(ctx, OrganizationService_GetOrganizationProfile_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *organizationServiceClient) ListOrganizationProfiles(ctx context.Context, in *ListOrganizationProfilesRequest, opts ...grpc.CallOption) (*ListOrganizationProfilesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListOrganizationProfilesResponse)
+	err := c.cc.Invoke(ctx, OrganizationService_ListOrganizationProfiles_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -720,6 +746,10 @@ type OrganizationServiceServer interface {
 	ListMyOrganizations(context.Context, *ListMyOrganizationsRequest) (*ListOrganizationsResponse, error)
 	ListOrganizations(context.Context, *ListOrganizationsRequest) (*ListOrganizationsResponse, error)
 	GetOrganization(context.Context, *OrganizationRequest) (*Organization, error)
+	// Public: the name and logo shown on event pages. No membership needed.
+	GetOrganizationProfile(context.Context, *OrganizationProfileRequest) (*OrganizationProfile, error)
+	// Public: profiles for many organizations at once (unknown ids are skipped).
+	ListOrganizationProfiles(context.Context, *ListOrganizationProfilesRequest) (*ListOrganizationProfilesResponse, error)
 	UpdateOrganization(context.Context, *UpdateOrganizationRequest) (*Organization, error)
 	UpdateOrganizationAvatar(context.Context, *UpdateOrganizationAvatarRequest) (*Organization, error)
 	ListMembers(context.Context, *OrganizationRequest) (*ListMembersResponse, error)
@@ -749,6 +779,12 @@ func (UnimplementedOrganizationServiceServer) ListOrganizations(context.Context,
 }
 func (UnimplementedOrganizationServiceServer) GetOrganization(context.Context, *OrganizationRequest) (*Organization, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetOrganization not implemented")
+}
+func (UnimplementedOrganizationServiceServer) GetOrganizationProfile(context.Context, *OrganizationProfileRequest) (*OrganizationProfile, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetOrganizationProfile not implemented")
+}
+func (UnimplementedOrganizationServiceServer) ListOrganizationProfiles(context.Context, *ListOrganizationProfilesRequest) (*ListOrganizationProfilesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListOrganizationProfiles not implemented")
 }
 func (UnimplementedOrganizationServiceServer) UpdateOrganization(context.Context, *UpdateOrganizationRequest) (*Organization, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateOrganization not implemented")
@@ -854,6 +890,42 @@ func _OrganizationService_GetOrganization_Handler(srv interface{}, ctx context.C
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(OrganizationServiceServer).GetOrganization(ctx, req.(*OrganizationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _OrganizationService_GetOrganizationProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(OrganizationProfileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrganizationServiceServer).GetOrganizationProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: OrganizationService_GetOrganizationProfile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrganizationServiceServer).GetOrganizationProfile(ctx, req.(*OrganizationProfileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _OrganizationService_ListOrganizationProfiles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListOrganizationProfilesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrganizationServiceServer).ListOrganizationProfiles(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: OrganizationService_ListOrganizationProfiles_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrganizationServiceServer).ListOrganizationProfiles(ctx, req.(*ListOrganizationProfilesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1074,6 +1146,14 @@ var OrganizationService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetOrganization",
 			Handler:    _OrganizationService_GetOrganization_Handler,
+		},
+		{
+			MethodName: "GetOrganizationProfile",
+			Handler:    _OrganizationService_GetOrganizationProfile_Handler,
+		},
+		{
+			MethodName: "ListOrganizationProfiles",
+			Handler:    _OrganizationService_ListOrganizationProfiles_Handler,
 		},
 		{
 			MethodName: "UpdateOrganization",

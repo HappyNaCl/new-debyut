@@ -1,0 +1,450 @@
+@use "tokens" as *
+@use "page" as *
+
+$header-height: 64px
+$nav-height: 52px
+
+.event-detail-root
+  @include content-page
+  background: $surface-muted
+
+  .muted
+    margin: 0
+    color: $text-muted
+
+  .visually-hidden
+    position: absolute
+    width: 1px
+    height: 1px
+    overflow: hidden
+    clip: rect(0 0 0 0)
+    white-space: nowrap
+
+  // --- Hero: the banner, blurred, behind the title.
+  .hero
+    position: relative
+    overflow: hidden
+    background: $strong
+    color: #fff
+
+  .hero-backdrop
+    position: absolute
+    inset: -40px
+    background-position: center
+    background-size: cover
+    filter: blur(28px) saturate(1.2)
+    transform: scale(1.1)
+
+    &::after
+      content: ""
+      position: absolute
+      inset: 0
+      background: linear-gradient(90deg, rgba(10, 14, 24, 0.82), rgba(10, 14, 24, 0.55))
+
+  .hero-inner
+    position: relative
+    // Tall enough that the summary card (lifted 220px) never reaches the site header.
+    min-height: 240px
+    max-width: 1200px
+    margin: 0 auto
+    padding: 40px 24px 48px
+
+  .hero-text
+    max-width: calc(100% - 420px)
+
+    h1
+      margin: 0 0 16px
+      font-size: 30px
+      font-weight: 800
+      line-height: 1.2
+      overflow-wrap: anywhere
+
+  .facts
+    display: flex
+    flex-direction: column
+    gap: 10px
+    margin: 0
+    padding: 0
+    list-style: none
+    font-size: 15px
+    font-weight: 600
+
+    li
+      display: flex
+      align-items: flex-start
+      gap: 10px
+
+      svg
+        flex-shrink: 0
+        margin-top: 1px
+
+    &.compact
+      gap: 8px
+      font-size: 14px
+      font-weight: 500
+      color: $text
+
+      svg
+        color: $text-muted
+
+  // --- Section links (sticky under the site header).
+  .section-nav
+    position: sticky
+    top: $header-height
+    z-index: 20
+    border-bottom: 1px solid $border
+    background: $surface
+
+  .section-nav-inner
+    display: flex
+    gap: 28px
+    max-width: 1200px
+    margin: 0 auto
+    padding: 0 24px
+    overflow-x: auto
+
+  .section-link
+    display: inline-flex
+    align-items: center
+    flex-shrink: 0
+    height: $nav-height
+    border-bottom: 3px solid transparent
+    font-size: 14px
+    font-weight: 700
+    color: $text-muted
+
+    &:hover
+      color: $text
+      text-decoration: none
+
+    &.active
+      border-bottom-color: $primary
+      color: $primary
+
+  // --- Two columns: content, and the summary card that overlaps the hero.
+  .layout
+    display: grid
+    grid-template-columns: minmax(0, 1fr) 380px
+    gap: 40px
+    max-width: 1200px
+    margin: 0 auto
+    padding: 0 24px 96px
+
+  .main-column
+    display: flex
+    flex-direction: column
+    gap: 48px
+    padding-top: 32px
+
+  .detail-section
+    scroll-margin-top: $header-height + $nav-height + 20px
+
+  .section-title
+    display: flex
+    align-items: center
+    gap: 10px
+    margin: 0 0 16px
+    font-size: 22px
+    font-weight: 800
+
+  .gallery
+    display: grid
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr))
+    gap: 12px
+    margin-top: 24px
+
+  .gallery-photo
+    aspect-ratio: 4 / 3
+    overflow: hidden
+    border-radius: 10px
+    background: $surface
+
+    img
+      width: 100%
+      height: 100%
+      object-fit: cover
+      transition: transform 0.2s
+
+    &:hover img
+      transform: scale(1.03)
+
+  .venue
+    display: flex
+    gap: 12px
+    margin-top: 24px
+    padding: 16px
+    border: 1px solid $border
+    border-radius: 12px
+    background: $surface
+
+    > svg
+      flex-shrink: 0
+      color: $primary
+
+    p
+      margin: 0
+
+  .venue-name
+    font-weight: 800
+
+  .venue-address
+    margin-top: 2px !important
+    font-size: 14px
+    color: $text-muted
+
+  .venue-map
+    display: inline-flex
+    align-items: center
+    gap: 4px
+    margin-top: 8px
+    font-size: 14px
+    font-weight: 700
+
+  // --- Tickets: one flat list, every ticket visible.
+  .ticket-list
+    display: flex
+    flex-direction: column
+    margin: 0
+    padding: 0
+    list-style: none
+    border: 1px solid $border
+    border-radius: 12px
+    background: $surface
+    box-shadow: $card-shadow
+
+  .ticket
+    display: grid
+    grid-template-columns: 140px minmax(0, 1fr) auto
+    align-items: start
+    gap: 16px
+    padding: 18px 20px
+
+    & + .ticket
+      border-top: 1px solid $border
+
+    &.closed
+      .ticket-price, .ticket-name
+        color: $text-subtle
+
+  .ticket-price
+    font-size: 16px
+    font-weight: 800
+
+  .ticket-info
+    display: flex
+    flex-direction: column
+    gap: 4px
+    min-width: 0
+
+  .ticket-name
+    display: flex
+    align-items: center
+    gap: 8px
+    flex-wrap: wrap
+    font-size: 15px
+    font-weight: 700
+    text-transform: uppercase
+    letter-spacing: 0.2px
+
+  .streaming-tag
+    display: inline-flex
+    align-items: center
+    gap: 4px
+    padding: 2px 8px
+    border-radius: 999px
+    background: $warning-soft
+    font-size: 11px
+    font-weight: 800
+    color: $warning
+    text-transform: none
+    letter-spacing: 0
+
+  .ticket-description
+    font-size: 14px
+    line-height: 1.5
+    color: $text-muted
+    white-space: pre-line
+
+  .ticket-meta
+    font-size: 12px
+    color: $text-subtle
+
+  .sale-state
+    padding: 3px 10px
+    border-radius: 999px
+    font-size: 12px
+    font-weight: 700
+    white-space: nowrap
+
+    &.open
+      background: $info-soft
+      color: $info
+
+    &.soon
+      background: $warning-soft
+      color: $warning
+
+    &.closed
+      background: $surface-muted
+      color: $text-muted
+
+  .fee-note
+    margin: 10px 0 0
+    font-size: 13px
+    color: $text-muted
+
+  // --- Summary card.
+  .side-column
+    position: relative
+    display: flex
+    flex-direction: column
+    gap: 20px
+
+  .summary-card
+    position: sticky
+    top: $header-height + $nav-height + 16px
+    // Lift the card up over the hero and the section links.
+    z-index: 25
+    margin-top: -220px
+    overflow: hidden
+    border: 1px solid $border
+    border-radius: 14px
+    background: $surface
+    box-shadow: 0 12px 32px rgba(15, 17, 21, 0.14)
+
+  .summary-image
+    display: block
+    width: 100%
+    aspect-ratio: 724 / 340
+    object-fit: cover
+
+    &.square
+      aspect-ratio: 16 / 9
+
+  .price-bar
+    display: flex
+    align-items: center
+    justify-content: space-between
+    gap: 12px
+    padding: 14px 18px
+    border-bottom: 1px solid $border
+
+    > div
+      display: flex
+      flex-direction: column
+
+  .price-label
+    font-size: 12px
+    color: $text-muted
+
+  .price-value
+    font-size: 18px
+    font-weight: 800
+
+  .summary-body
+    display: flex
+    flex-direction: column
+    gap: 14px
+    padding: 18px
+
+  .summary-title
+    margin: 0
+    font-size: 20px
+    font-weight: 800
+    overflow-wrap: anywhere
+
+  .organizer
+    display: flex
+    align-items: center
+    gap: 10px
+    padding-top: 14px
+    border-top: 1px solid $border
+
+    > div
+      display: flex
+      flex-direction: column
+      min-width: 0
+
+  .organizer-label
+    font-size: 12px
+    color: $text-muted
+
+  .organizer-name
+    font-size: 15px
+    font-weight: 700
+    overflow-wrap: anywhere
+
+  .share
+    display: flex
+    flex-direction: column
+    gap: 8px
+
+  .share-label
+    font-size: 14px
+    font-weight: 700
+
+  .copy-button
+    display: inline-flex
+    align-items: center
+    gap: 8px
+    align-self: flex-start
+    height: 38px
+    padding: 0 14px
+    border: 1px solid $border
+    border-radius: 999px
+    background: $surface
+    font-size: 14px
+    font-weight: 700
+    color: $text
+    cursor: pointer
+
+    &:hover
+      border-color: $primary
+      color: $primary
+
+    &.copied
+      border-color: $info
+      color: $info
+
+  @media (max-width: 960px)
+    .hero-text
+      max-width: none
+
+    .hero-inner
+      min-height: 0
+
+    .layout
+      grid-template-columns: minmax(0, 1fr)
+      gap: 24px
+
+    .side-column
+      order: -1
+      padding-top: 24px
+
+    .summary-card
+      position: static
+      margin-top: 0
+
+    .summary-image
+      display: none
+
+    .main-column
+      padding-top: 0
+
+  @media (max-width: 640px)
+    .hero-inner
+      padding: 28px 16px 32px
+
+    .hero-text h1
+      font-size: 24px
+
+    .layout, .section-nav-inner
+      padding-left: 16px
+      padding-right: 16px
+
+    .ticket
+      grid-template-columns: minmax(0, 1fr) auto
+      gap: 6px 12px
+
+    .ticket-price
+      grid-column: 1 / -1

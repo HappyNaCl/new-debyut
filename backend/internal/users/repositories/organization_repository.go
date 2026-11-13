@@ -22,6 +22,24 @@ func NewOrganizationRepository(db *gorm.DB) *OrganizationRepository {
 	}
 }
 
+func (r *OrganizationRepository) GetById(ctx context.Context, organizationId string) (*models.Organization, error) {
+	organization, err := gorm.G[models.Organization](r.db).Where("id = ?", organizationId).First(ctx)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, apperrors.ErrOrganizationNotFound
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &organization, nil
+}
+
+func (r *OrganizationRepository) ListByIds(ctx context.Context, ids []string) ([]models.Organization, error) {
+	if len(ids) == 0 {
+		return []models.Organization{}, nil
+	}
+	return gorm.G[models.Organization](r.db).Where("id IN ?", ids).Find(ctx)
+}
+
 func (r *OrganizationRepository) ListByMember(ctx context.Context, userId string) ([]models.MembershipOrganization, error) {
 	var organizations []models.MembershipOrganization
 	err := r.db.WithContext(ctx).

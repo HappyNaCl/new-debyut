@@ -5,7 +5,7 @@
   interface Props {
     open: boolean;
     title?: string;
-    size?: "small" | "medium";
+    size?: "small" | "medium" | "large";
     dismissible?: boolean;
     onClose: () => void;
     children: Snippet;
@@ -35,6 +35,7 @@
   bind:this={dialog}
   class="modal"
   class:small={size === "small"}
+  class:large={size === "large"}
   aria-label={title}
   oncancel={handleCancel}
   onclick={handleBackdropClick}
@@ -69,6 +70,9 @@
 
     &.small
       width: min(420px, calc(100vw - 32px))
+
+    &.large
+      width: min(760px, calc(100vw - 32px))
 
     &::backdrop
       background: var(--color-backdrop)
