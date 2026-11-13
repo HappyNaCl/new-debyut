@@ -20,14 +20,14 @@ func NewEventGrpcServer(addr string) *EventGrpcServer {
 	}
 }
 
-func (s *EventGrpcServer) Run(server *grpc.Server, categoryService *services.CategoryService) error {
+func (s *EventGrpcServer) Run(server *grpc.Server, categoryService *services.CategoryService, eventService *services.EventService) error {
 	lis, err := net.Listen("tcp", s.addr)
 	if err != nil {
 		l.Logger.Fatal("Failed to listen", zap.String("address", s.addr))
 		return err
 	}
 
-	eventhandlers.NewEventGrpcHandler(server, categoryService)
+	eventhandlers.NewEventGrpcHandler(server, categoryService, eventService)
 
 	l.Logger.Info("Event gRPC server is running!")
 	return server.Serve(lis)

@@ -2115,6 +2115,198 @@ func (x *ListInvitationsResponse) GetInvitations() []*Invitation {
 	return nil
 }
 
+type OrganizationProfileRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	OrganizationId string                 `protobuf:"bytes,1,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *OrganizationProfileRequest) Reset() {
+	*x = OrganizationProfileRequest{}
+	mi := &file_api_protobuf_users_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *OrganizationProfileRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*OrganizationProfileRequest) ProtoMessage() {}
+
+func (x *OrganizationProfileRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_protobuf_users_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use OrganizationProfileRequest.ProtoReflect.Descriptor instead.
+func (*OrganizationProfileRequest) Descriptor() ([]byte, []int) {
+	return file_api_protobuf_users_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *OrganizationProfileRequest) GetOrganizationId() string {
+	if x != nil {
+		return x.OrganizationId
+	}
+	return ""
+}
+
+type OrganizationProfile struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	AvatarUrl     string                 `protobuf:"bytes,3,opt,name=avatar_url,json=avatarUrl,proto3" json:"avatar_url,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *OrganizationProfile) Reset() {
+	*x = OrganizationProfile{}
+	mi := &file_api_protobuf_users_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *OrganizationProfile) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*OrganizationProfile) ProtoMessage() {}
+
+func (x *OrganizationProfile) ProtoReflect() protoreflect.Message {
+	mi := &file_api_protobuf_users_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use OrganizationProfile.ProtoReflect.Descriptor instead.
+func (*OrganizationProfile) Descriptor() ([]byte, []int) {
+	return file_api_protobuf_users_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *OrganizationProfile) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *OrganizationProfile) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *OrganizationProfile) GetAvatarUrl() string {
+	if x != nil {
+		return x.AvatarUrl
+	}
+	return ""
+}
+
+type ListOrganizationProfilesRequest struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	OrganizationIds []string               `protobuf:"bytes,1,rep,name=organization_ids,json=organizationIds,proto3" json:"organization_ids,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *ListOrganizationProfilesRequest) Reset() {
+	*x = ListOrganizationProfilesRequest{}
+	mi := &file_api_protobuf_users_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListOrganizationProfilesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListOrganizationProfilesRequest) ProtoMessage() {}
+
+func (x *ListOrganizationProfilesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_protobuf_users_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListOrganizationProfilesRequest.ProtoReflect.Descriptor instead.
+func (*ListOrganizationProfilesRequest) Descriptor() ([]byte, []int) {
+	return file_api_protobuf_users_proto_rawDescGZIP(), []int{31}
+}
+
+func (x *ListOrganizationProfilesRequest) GetOrganizationIds() []string {
+	if x != nil {
+		return x.OrganizationIds
+	}
+	return nil
+}
+
+type ListOrganizationProfilesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Organizations []*OrganizationProfile `protobuf:"bytes,1,rep,name=organizations,proto3" json:"organizations,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListOrganizationProfilesResponse) Reset() {
+	*x = ListOrganizationProfilesResponse{}
+	mi := &file_api_protobuf_users_proto_msgTypes[32]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListOrganizationProfilesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListOrganizationProfilesResponse) ProtoMessage() {}
+
+func (x *ListOrganizationProfilesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_protobuf_users_proto_msgTypes[32]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListOrganizationProfilesResponse.ProtoReflect.Descriptor instead.
+func (*ListOrganizationProfilesResponse) Descriptor() ([]byte, []int) {
+	return file_api_protobuf_users_proto_rawDescGZIP(), []int{32}
+}
+
+func (x *ListOrganizationProfilesResponse) GetOrganizations() []*OrganizationProfile {
+	if x != nil {
+		return x.Organizations
+	}
+	return nil
+}
+
 var File_api_protobuf_users_proto protoreflect.FileDescriptor
 
 const file_api_protobuf_users_proto_rawDesc = "" +
@@ -2270,7 +2462,18 @@ const file_api_protobuf_users_proto_rawDesc = "" +
 	"\x18ListMyInvitationsRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\"H\n" +
 	"\x17ListInvitationsResponse\x12-\n" +
-	"\vinvitations\x18\x01 \x03(\v2\v.InvitationR\vinvitations*`\n" +
+	"\vinvitations\x18\x01 \x03(\v2\v.InvitationR\vinvitations\"E\n" +
+	"\x1aOrganizationProfileRequest\x12'\n" +
+	"\x0forganization_id\x18\x01 \x01(\tR\x0eorganizationId\"X\n" +
+	"\x13OrganizationProfile\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1d\n" +
+	"\n" +
+	"avatar_url\x18\x03 \x01(\tR\tavatarUrl\"L\n" +
+	"\x1fListOrganizationProfilesRequest\x12)\n" +
+	"\x10organization_ids\x18\x01 \x03(\tR\x0forganizationIds\"^\n" +
+	" ListOrganizationProfilesResponse\x12:\n" +
+	"\rorganizations\x18\x01 \x03(\v2\x14.OrganizationProfileR\rorganizations*`\n" +
 	"\x11ApplicationStatus\x12\"\n" +
 	"\x1eAPPLICATION_STATUS_UNSPECIFIED\x10\x00\x12\v\n" +
 	"\aPENDING\x10\x01\x12\f\n" +
@@ -2303,11 +2506,13 @@ const file_api_protobuf_users_proto_rawDesc = "" +
 	"\x12ListMyApplications\x12\x1a.ListMyApplicationsRequest\x1a\x19.ListApplicationsResponse\x12G\n" +
 	"\x10ListApplications\x12\x18.ListApplicationsRequest\x1a\x19.ListApplicationsResponse\x12F\n" +
 	"\x12ApproveApplication\x12\x19.ReviewApplicationRequest\x1a\x15.OrganizerApplication\x12F\n" +
-	"\x12DeclineApplication\x12\x19.ReviewApplicationRequest\x1a\x15.OrganizerApplication2\xc9\a\n" +
+	"\x12DeclineApplication\x12\x19.ReviewApplicationRequest\x1a\x15.OrganizerApplication2\xf7\b\n" +
 	"\x13OrganizationService\x12N\n" +
 	"\x13ListMyOrganizations\x12\x1b.ListMyOrganizationsRequest\x1a\x1a.ListOrganizationsResponse\x12J\n" +
 	"\x11ListOrganizations\x12\x19.ListOrganizationsRequest\x1a\x1a.ListOrganizationsResponse\x126\n" +
-	"\x0fGetOrganization\x12\x14.OrganizationRequest\x1a\r.Organization\x12?\n" +
+	"\x0fGetOrganization\x12\x14.OrganizationRequest\x1a\r.Organization\x12K\n" +
+	"\x16GetOrganizationProfile\x12\x1b.OrganizationProfileRequest\x1a\x14.OrganizationProfile\x12_\n" +
+	"\x18ListOrganizationProfiles\x12 .ListOrganizationProfilesRequest\x1a!.ListOrganizationProfilesResponse\x12?\n" +
 	"\x12UpdateOrganization\x12\x1a.UpdateOrganizationRequest\x1a\r.Organization\x12K\n" +
 	"\x18UpdateOrganizationAvatar\x12 .UpdateOrganizationAvatarRequest\x1a\r.Organization\x129\n" +
 	"\vListMembers\x12\x14.OrganizationRequest\x1a\x14.ListMembersResponse\x12<\n" +
@@ -2333,119 +2538,128 @@ func file_api_protobuf_users_proto_rawDescGZIP() []byte {
 }
 
 var file_api_protobuf_users_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_api_protobuf_users_proto_msgTypes = make([]protoimpl.MessageInfo, 29)
+var file_api_protobuf_users_proto_msgTypes = make([]protoimpl.MessageInfo, 33)
 var file_api_protobuf_users_proto_goTypes = []any{
-	(ApplicationStatus)(0),                  // 0: ApplicationStatus
-	(MemberRole)(0),                         // 1: MemberRole
-	(MemberStatus)(0),                       // 2: MemberStatus
-	(InvitationStatus)(0),                   // 3: InvitationStatus
-	(*GetMeRequest)(nil),                    // 4: GetMeRequest
-	(*GetMeResponse)(nil),                   // 5: GetMeResponse
-	(*UpdateMeRequest)(nil),                 // 6: UpdateMeRequest
-	(*OrganizerApplication)(nil),            // 7: OrganizerApplication
-	(*RequestEmailOtpRequest)(nil),          // 8: RequestEmailOtpRequest
-	(*VerifyEmailOtpRequest)(nil),           // 9: VerifyEmailOtpRequest
-	(*VerifyEmailOtpResponse)(nil),          // 10: VerifyEmailOtpResponse
-	(*SubmitApplicationRequest)(nil),        // 11: SubmitApplicationRequest
-	(*ListMyApplicationsRequest)(nil),       // 12: ListMyApplicationsRequest
-	(*ListApplicationsRequest)(nil),         // 13: ListApplicationsRequest
-	(*ListApplicationsResponse)(nil),        // 14: ListApplicationsResponse
-	(*ReviewApplicationRequest)(nil),        // 15: ReviewApplicationRequest
-	(*Organization)(nil),                    // 16: Organization
-	(*OrganizationMember)(nil),              // 17: OrganizationMember
-	(*ListMyOrganizationsRequest)(nil),      // 18: ListMyOrganizationsRequest
-	(*ListOrganizationsRequest)(nil),        // 19: ListOrganizationsRequest
-	(*ListOrganizationsResponse)(nil),       // 20: ListOrganizationsResponse
-	(*OrganizationRequest)(nil),             // 21: OrganizationRequest
-	(*UpdateAvatarRequest)(nil),             // 22: UpdateAvatarRequest
-	(*UpdateOrganizationAvatarRequest)(nil), // 23: UpdateOrganizationAvatarRequest
-	(*UpdateOrganizationRequest)(nil),       // 24: UpdateOrganizationRequest
-	(*ListMembersResponse)(nil),             // 25: ListMembersResponse
-	(*RemoveMemberRequest)(nil),             // 26: RemoveMemberRequest
-	(*SetMemberStatusRequest)(nil),          // 27: SetMemberStatusRequest
-	(*Invitation)(nil),                      // 28: Invitation
-	(*CreateInvitationRequest)(nil),         // 29: CreateInvitationRequest
-	(*InvitationActionRequest)(nil),         // 30: InvitationActionRequest
-	(*ListMyInvitationsRequest)(nil),        // 31: ListMyInvitationsRequest
-	(*ListInvitationsResponse)(nil),         // 32: ListInvitationsResponse
-	(*timestamppb.Timestamp)(nil),           // 33: google.protobuf.Timestamp
-	(*emptypb.Empty)(nil),                   // 34: google.protobuf.Empty
+	(ApplicationStatus)(0),                   // 0: ApplicationStatus
+	(MemberRole)(0),                          // 1: MemberRole
+	(MemberStatus)(0),                        // 2: MemberStatus
+	(InvitationStatus)(0),                    // 3: InvitationStatus
+	(*GetMeRequest)(nil),                     // 4: GetMeRequest
+	(*GetMeResponse)(nil),                    // 5: GetMeResponse
+	(*UpdateMeRequest)(nil),                  // 6: UpdateMeRequest
+	(*OrganizerApplication)(nil),             // 7: OrganizerApplication
+	(*RequestEmailOtpRequest)(nil),           // 8: RequestEmailOtpRequest
+	(*VerifyEmailOtpRequest)(nil),            // 9: VerifyEmailOtpRequest
+	(*VerifyEmailOtpResponse)(nil),           // 10: VerifyEmailOtpResponse
+	(*SubmitApplicationRequest)(nil),         // 11: SubmitApplicationRequest
+	(*ListMyApplicationsRequest)(nil),        // 12: ListMyApplicationsRequest
+	(*ListApplicationsRequest)(nil),          // 13: ListApplicationsRequest
+	(*ListApplicationsResponse)(nil),         // 14: ListApplicationsResponse
+	(*ReviewApplicationRequest)(nil),         // 15: ReviewApplicationRequest
+	(*Organization)(nil),                     // 16: Organization
+	(*OrganizationMember)(nil),               // 17: OrganizationMember
+	(*ListMyOrganizationsRequest)(nil),       // 18: ListMyOrganizationsRequest
+	(*ListOrganizationsRequest)(nil),         // 19: ListOrganizationsRequest
+	(*ListOrganizationsResponse)(nil),        // 20: ListOrganizationsResponse
+	(*OrganizationRequest)(nil),              // 21: OrganizationRequest
+	(*UpdateAvatarRequest)(nil),              // 22: UpdateAvatarRequest
+	(*UpdateOrganizationAvatarRequest)(nil),  // 23: UpdateOrganizationAvatarRequest
+	(*UpdateOrganizationRequest)(nil),        // 24: UpdateOrganizationRequest
+	(*ListMembersResponse)(nil),              // 25: ListMembersResponse
+	(*RemoveMemberRequest)(nil),              // 26: RemoveMemberRequest
+	(*SetMemberStatusRequest)(nil),           // 27: SetMemberStatusRequest
+	(*Invitation)(nil),                       // 28: Invitation
+	(*CreateInvitationRequest)(nil),          // 29: CreateInvitationRequest
+	(*InvitationActionRequest)(nil),          // 30: InvitationActionRequest
+	(*ListMyInvitationsRequest)(nil),         // 31: ListMyInvitationsRequest
+	(*ListInvitationsResponse)(nil),          // 32: ListInvitationsResponse
+	(*OrganizationProfileRequest)(nil),       // 33: OrganizationProfileRequest
+	(*OrganizationProfile)(nil),              // 34: OrganizationProfile
+	(*ListOrganizationProfilesRequest)(nil),  // 35: ListOrganizationProfilesRequest
+	(*ListOrganizationProfilesResponse)(nil), // 36: ListOrganizationProfilesResponse
+	(*timestamppb.Timestamp)(nil),            // 37: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),                    // 38: google.protobuf.Empty
 }
 var file_api_protobuf_users_proto_depIdxs = []int32{
-	33, // 0: GetMeResponse.date_of_birth:type_name -> google.protobuf.Timestamp
-	33, // 1: UpdateMeRequest.date_of_birth:type_name -> google.protobuf.Timestamp
+	37, // 0: GetMeResponse.date_of_birth:type_name -> google.protobuf.Timestamp
+	37, // 1: UpdateMeRequest.date_of_birth:type_name -> google.protobuf.Timestamp
 	0,  // 2: OrganizerApplication.status:type_name -> ApplicationStatus
-	33, // 3: OrganizerApplication.reviewed_at:type_name -> google.protobuf.Timestamp
-	33, // 4: OrganizerApplication.created_at:type_name -> google.protobuf.Timestamp
+	37, // 3: OrganizerApplication.reviewed_at:type_name -> google.protobuf.Timestamp
+	37, // 4: OrganizerApplication.created_at:type_name -> google.protobuf.Timestamp
 	0,  // 5: ListApplicationsRequest.status:type_name -> ApplicationStatus
 	7,  // 6: ListApplicationsResponse.applications:type_name -> OrganizerApplication
 	1,  // 7: Organization.my_role:type_name -> MemberRole
-	33, // 8: Organization.created_at:type_name -> google.protobuf.Timestamp
+	37, // 8: Organization.created_at:type_name -> google.protobuf.Timestamp
 	1,  // 9: OrganizationMember.role:type_name -> MemberRole
-	33, // 10: OrganizationMember.joined_at:type_name -> google.protobuf.Timestamp
+	37, // 10: OrganizationMember.joined_at:type_name -> google.protobuf.Timestamp
 	2,  // 11: OrganizationMember.status:type_name -> MemberStatus
 	16, // 12: ListOrganizationsResponse.organizations:type_name -> Organization
 	17, // 13: ListMembersResponse.members:type_name -> OrganizationMember
 	2,  // 14: SetMemberStatusRequest.status:type_name -> MemberStatus
 	1,  // 15: Invitation.role:type_name -> MemberRole
 	3,  // 16: Invitation.status:type_name -> InvitationStatus
-	33, // 17: Invitation.expires_at:type_name -> google.protobuf.Timestamp
-	33, // 18: Invitation.created_at:type_name -> google.protobuf.Timestamp
+	37, // 17: Invitation.expires_at:type_name -> google.protobuf.Timestamp
+	37, // 18: Invitation.created_at:type_name -> google.protobuf.Timestamp
 	1,  // 19: CreateInvitationRequest.role:type_name -> MemberRole
 	28, // 20: ListInvitationsResponse.invitations:type_name -> Invitation
-	4,  // 21: UserService.GetMe:input_type -> GetMeRequest
-	6,  // 22: UserService.UpdateMe:input_type -> UpdateMeRequest
-	22, // 23: UserService.UpdateAvatar:input_type -> UpdateAvatarRequest
-	8,  // 24: OrganizerApplicationService.RequestEmailOtp:input_type -> RequestEmailOtpRequest
-	9,  // 25: OrganizerApplicationService.VerifyEmailOtp:input_type -> VerifyEmailOtpRequest
-	11, // 26: OrganizerApplicationService.SubmitApplication:input_type -> SubmitApplicationRequest
-	12, // 27: OrganizerApplicationService.ListMyApplications:input_type -> ListMyApplicationsRequest
-	13, // 28: OrganizerApplicationService.ListApplications:input_type -> ListApplicationsRequest
-	15, // 29: OrganizerApplicationService.ApproveApplication:input_type -> ReviewApplicationRequest
-	15, // 30: OrganizerApplicationService.DeclineApplication:input_type -> ReviewApplicationRequest
-	18, // 31: OrganizationService.ListMyOrganizations:input_type -> ListMyOrganizationsRequest
-	19, // 32: OrganizationService.ListOrganizations:input_type -> ListOrganizationsRequest
-	21, // 33: OrganizationService.GetOrganization:input_type -> OrganizationRequest
-	24, // 34: OrganizationService.UpdateOrganization:input_type -> UpdateOrganizationRequest
-	23, // 35: OrganizationService.UpdateOrganizationAvatar:input_type -> UpdateOrganizationAvatarRequest
-	21, // 36: OrganizationService.ListMembers:input_type -> OrganizationRequest
-	26, // 37: OrganizationService.RemoveMember:input_type -> RemoveMemberRequest
-	27, // 38: OrganizationService.SetMemberStatus:input_type -> SetMemberStatusRequest
-	29, // 39: OrganizationService.CreateInvitation:input_type -> CreateInvitationRequest
-	21, // 40: OrganizationService.ListInvitations:input_type -> OrganizationRequest
-	30, // 41: OrganizationService.RevokeInvitation:input_type -> InvitationActionRequest
-	31, // 42: OrganizationService.ListMyInvitations:input_type -> ListMyInvitationsRequest
-	30, // 43: OrganizationService.AcceptInvitation:input_type -> InvitationActionRequest
-	30, // 44: OrganizationService.DeclineInvitation:input_type -> InvitationActionRequest
-	5,  // 45: UserService.GetMe:output_type -> GetMeResponse
-	5,  // 46: UserService.UpdateMe:output_type -> GetMeResponse
-	5,  // 47: UserService.UpdateAvatar:output_type -> GetMeResponse
-	34, // 48: OrganizerApplicationService.RequestEmailOtp:output_type -> google.protobuf.Empty
-	10, // 49: OrganizerApplicationService.VerifyEmailOtp:output_type -> VerifyEmailOtpResponse
-	7,  // 50: OrganizerApplicationService.SubmitApplication:output_type -> OrganizerApplication
-	14, // 51: OrganizerApplicationService.ListMyApplications:output_type -> ListApplicationsResponse
-	14, // 52: OrganizerApplicationService.ListApplications:output_type -> ListApplicationsResponse
-	7,  // 53: OrganizerApplicationService.ApproveApplication:output_type -> OrganizerApplication
-	7,  // 54: OrganizerApplicationService.DeclineApplication:output_type -> OrganizerApplication
-	20, // 55: OrganizationService.ListMyOrganizations:output_type -> ListOrganizationsResponse
-	20, // 56: OrganizationService.ListOrganizations:output_type -> ListOrganizationsResponse
-	16, // 57: OrganizationService.GetOrganization:output_type -> Organization
-	16, // 58: OrganizationService.UpdateOrganization:output_type -> Organization
-	16, // 59: OrganizationService.UpdateOrganizationAvatar:output_type -> Organization
-	25, // 60: OrganizationService.ListMembers:output_type -> ListMembersResponse
-	34, // 61: OrganizationService.RemoveMember:output_type -> google.protobuf.Empty
-	17, // 62: OrganizationService.SetMemberStatus:output_type -> OrganizationMember
-	28, // 63: OrganizationService.CreateInvitation:output_type -> Invitation
-	32, // 64: OrganizationService.ListInvitations:output_type -> ListInvitationsResponse
-	34, // 65: OrganizationService.RevokeInvitation:output_type -> google.protobuf.Empty
-	32, // 66: OrganizationService.ListMyInvitations:output_type -> ListInvitationsResponse
-	17, // 67: OrganizationService.AcceptInvitation:output_type -> OrganizationMember
-	34, // 68: OrganizationService.DeclineInvitation:output_type -> google.protobuf.Empty
-	45, // [45:69] is the sub-list for method output_type
-	21, // [21:45] is the sub-list for method input_type
-	21, // [21:21] is the sub-list for extension type_name
-	21, // [21:21] is the sub-list for extension extendee
-	0,  // [0:21] is the sub-list for field type_name
+	34, // 21: ListOrganizationProfilesResponse.organizations:type_name -> OrganizationProfile
+	4,  // 22: UserService.GetMe:input_type -> GetMeRequest
+	6,  // 23: UserService.UpdateMe:input_type -> UpdateMeRequest
+	22, // 24: UserService.UpdateAvatar:input_type -> UpdateAvatarRequest
+	8,  // 25: OrganizerApplicationService.RequestEmailOtp:input_type -> RequestEmailOtpRequest
+	9,  // 26: OrganizerApplicationService.VerifyEmailOtp:input_type -> VerifyEmailOtpRequest
+	11, // 27: OrganizerApplicationService.SubmitApplication:input_type -> SubmitApplicationRequest
+	12, // 28: OrganizerApplicationService.ListMyApplications:input_type -> ListMyApplicationsRequest
+	13, // 29: OrganizerApplicationService.ListApplications:input_type -> ListApplicationsRequest
+	15, // 30: OrganizerApplicationService.ApproveApplication:input_type -> ReviewApplicationRequest
+	15, // 31: OrganizerApplicationService.DeclineApplication:input_type -> ReviewApplicationRequest
+	18, // 32: OrganizationService.ListMyOrganizations:input_type -> ListMyOrganizationsRequest
+	19, // 33: OrganizationService.ListOrganizations:input_type -> ListOrganizationsRequest
+	21, // 34: OrganizationService.GetOrganization:input_type -> OrganizationRequest
+	33, // 35: OrganizationService.GetOrganizationProfile:input_type -> OrganizationProfileRequest
+	35, // 36: OrganizationService.ListOrganizationProfiles:input_type -> ListOrganizationProfilesRequest
+	24, // 37: OrganizationService.UpdateOrganization:input_type -> UpdateOrganizationRequest
+	23, // 38: OrganizationService.UpdateOrganizationAvatar:input_type -> UpdateOrganizationAvatarRequest
+	21, // 39: OrganizationService.ListMembers:input_type -> OrganizationRequest
+	26, // 40: OrganizationService.RemoveMember:input_type -> RemoveMemberRequest
+	27, // 41: OrganizationService.SetMemberStatus:input_type -> SetMemberStatusRequest
+	29, // 42: OrganizationService.CreateInvitation:input_type -> CreateInvitationRequest
+	21, // 43: OrganizationService.ListInvitations:input_type -> OrganizationRequest
+	30, // 44: OrganizationService.RevokeInvitation:input_type -> InvitationActionRequest
+	31, // 45: OrganizationService.ListMyInvitations:input_type -> ListMyInvitationsRequest
+	30, // 46: OrganizationService.AcceptInvitation:input_type -> InvitationActionRequest
+	30, // 47: OrganizationService.DeclineInvitation:input_type -> InvitationActionRequest
+	5,  // 48: UserService.GetMe:output_type -> GetMeResponse
+	5,  // 49: UserService.UpdateMe:output_type -> GetMeResponse
+	5,  // 50: UserService.UpdateAvatar:output_type -> GetMeResponse
+	38, // 51: OrganizerApplicationService.RequestEmailOtp:output_type -> google.protobuf.Empty
+	10, // 52: OrganizerApplicationService.VerifyEmailOtp:output_type -> VerifyEmailOtpResponse
+	7,  // 53: OrganizerApplicationService.SubmitApplication:output_type -> OrganizerApplication
+	14, // 54: OrganizerApplicationService.ListMyApplications:output_type -> ListApplicationsResponse
+	14, // 55: OrganizerApplicationService.ListApplications:output_type -> ListApplicationsResponse
+	7,  // 56: OrganizerApplicationService.ApproveApplication:output_type -> OrganizerApplication
+	7,  // 57: OrganizerApplicationService.DeclineApplication:output_type -> OrganizerApplication
+	20, // 58: OrganizationService.ListMyOrganizations:output_type -> ListOrganizationsResponse
+	20, // 59: OrganizationService.ListOrganizations:output_type -> ListOrganizationsResponse
+	16, // 60: OrganizationService.GetOrganization:output_type -> Organization
+	34, // 61: OrganizationService.GetOrganizationProfile:output_type -> OrganizationProfile
+	36, // 62: OrganizationService.ListOrganizationProfiles:output_type -> ListOrganizationProfilesResponse
+	16, // 63: OrganizationService.UpdateOrganization:output_type -> Organization
+	16, // 64: OrganizationService.UpdateOrganizationAvatar:output_type -> Organization
+	25, // 65: OrganizationService.ListMembers:output_type -> ListMembersResponse
+	38, // 66: OrganizationService.RemoveMember:output_type -> google.protobuf.Empty
+	17, // 67: OrganizationService.SetMemberStatus:output_type -> OrganizationMember
+	28, // 68: OrganizationService.CreateInvitation:output_type -> Invitation
+	32, // 69: OrganizationService.ListInvitations:output_type -> ListInvitationsResponse
+	38, // 70: OrganizationService.RevokeInvitation:output_type -> google.protobuf.Empty
+	32, // 71: OrganizationService.ListMyInvitations:output_type -> ListInvitationsResponse
+	17, // 72: OrganizationService.AcceptInvitation:output_type -> OrganizationMember
+	38, // 73: OrganizationService.DeclineInvitation:output_type -> google.protobuf.Empty
+	48, // [48:74] is the sub-list for method output_type
+	22, // [22:48] is the sub-list for method input_type
+	22, // [22:22] is the sub-list for extension type_name
+	22, // [22:22] is the sub-list for extension extendee
+	0,  // [0:22] is the sub-list for field type_name
 }
 
 func init() { file_api_protobuf_users_proto_init() }
@@ -2459,7 +2673,7 @@ func file_api_protobuf_users_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_protobuf_users_proto_rawDesc), len(file_api_protobuf_users_proto_rawDesc)),
 			NumEnums:      4,
-			NumMessages:   29,
+			NumMessages:   33,
 			NumExtensions: 0,
 			NumServices:   3,
 		},

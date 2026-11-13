@@ -44,6 +44,10 @@ func (r *CategoryRepository) Update(ctx context.Context, category *models.Catego
 
 func (r *CategoryRepository) Delete(ctx context.Context, id string) error {
 	rows, err := gorm.G[models.Category](r.db).Where("id = ?", id).Delete(ctx)
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) && pgErr.Code == "23503" {
+		return apperrors.ErrCategoryInUse
+	}
 	if err != nil {
 		return err
 	}
@@ -64,4 +68,9 @@ func mapDBError(err error) error {
 		}
 	}
 	return err
+}
+
+func (r *CategoryRepository) Exists(ctx context.Context, id string) (bool, error) {
+	count, err := gorm.G[models.Category](r.db).Where("id = ?", id).Count(ctx, "id")
+	return count > 0, err
 }

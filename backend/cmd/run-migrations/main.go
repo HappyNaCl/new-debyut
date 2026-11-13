@@ -51,6 +51,8 @@ func main() {
 		panic("Failed to connect to Event Database.")
 	}
 	eventDb.AutoMigrate(eventmodels.Category{})
+	eventDb.AutoMigrate(eventmodels.Event{})
+	eventDb.AutoMigrate(eventmodels.TicketType{})
 	fmt.Println("Migrated Event Database")
 
 	if *seed {

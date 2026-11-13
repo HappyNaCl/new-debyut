@@ -12,6 +12,7 @@
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^7.1.2",
     "@tsconfig/svelte": "^5.0.8",
+    "@types/leaflet": "1.9.22",
     "@types/node": "^24.13.2",
     "sass": "^1.101.0",
     "svelte": "^5.56.4",
@@ -22,7 +23,13 @@
   "dependencies": {
     "@material-symbols-svg/svelte": "^0.11.0",
     "@tanstack/svelte-query": "^6.1.36",
+    "@tiptap/core": "3.32.1",
+    "@tiptap/extensions": "3.32.1",
+    "@tiptap/pm": "3.32.1",
+    "@tiptap/starter-kit": "3.32.1",
     "axios": "^1.18.1",
+    "dompurify": "3.4.17",
+    "leaflet": "1.9.4",
     "svelte-spa-router": "^5.1.1",
     "zod": "^4.4.3"
   }

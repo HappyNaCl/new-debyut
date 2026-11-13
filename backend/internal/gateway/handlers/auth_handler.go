@@ -41,7 +41,14 @@ func NewAuthHttpHandler(authClient auth.AuthServiceClient) *AuthHttpHandler {
 	return &AuthHttpHandler{authClient: authClient}
 }
 
+// respondError writes a gRPC error as JSON. Errors that carry field
+// violations (errdetails.BadRequest) become {"error": {"<field>": "<message>"}}
+// so forms can show them inline; everything else is {"error": "<message>"}.
 func respondError(c *gin.Context, err error) {
+	if fields := grpcerror.FieldViolations(err); len(fields) > 0 {
+		c.JSON(grpcerror.HTTPStatus(err), gin.H{"error": fields})
+		return
+	}
 	c.JSON(grpcerror.HTTPStatus(err), gin.H{"error": grpcerror.Message(err)})
 }
 

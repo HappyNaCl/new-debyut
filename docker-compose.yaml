@@ -131,6 +131,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+      rustfs:
+        condition: service_started
     networks:
       - network
 

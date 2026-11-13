@@ -12,6 +12,8 @@
   import WorkWithUs from "./lib/components/pages/WorkWithUsPage.svelte";
   import OrganizerDashboard from "./lib/components/pages/OrganizerDashboardPage.svelte";
   import OrganizerEvents from "./lib/components/pages/OrganizerEventsPage.svelte";
+  import OrganizerEventForm from "./lib/components/pages/OrganizerEventFormPage.svelte";
+  import EventDetail from "./lib/components/pages/EventDetailPage.svelte";
   import OrganizerMembers from "./lib/components/pages/OrganizerMembersPage.svelte";
   import Invitations from "./lib/components/pages/InvitationsPage.svelte";
   import Tickets from "./lib/components/pages/TicketsPage.svelte";
@@ -56,6 +58,7 @@
     "/login": wrap({ component: Login, conditions: [signedOut] }),
     "/register": wrap({ component: Register, conditions: [signedOut] }),
     "/work-with-us": wrap({ component: WorkWithUs, conditions: [signedIn, isNotAdmin], userData: signInRequired }),
+    "/events/:id": EventDetail,
     "/invitations": wrap({ component: Invitations, conditions: [signedIn], userData: signInRequired }),
     "/tickets": wrap({ component: Tickets, conditions: [signedIn], userData: signInRequired }),
     "/vod": wrap({ component: Vod, conditions: [signedIn], userData: signInRequired }),
@@ -64,6 +67,8 @@
     "/organizer": wrap({ component: OrganizerDashboard, conditions: [isOrganizer] }),
     "/organizer/:id": wrap({ component: OrganizerDashboard, conditions: [isOrganizer] }),
     "/organizer/:id/events": wrap({ component: OrganizerEvents, conditions: [isOrganizer] }),
+    "/organizer/:id/events/new": wrap({ component: OrganizerEventForm, conditions: [isOrganizer] }),
+    "/organizer/:id/events/:eventId/edit": wrap({ component: OrganizerEventForm, conditions: [isOrganizer] }),
     "/organizer/:id/members": wrap({ component: OrganizerMembers, conditions: [isOrganizer] }),
     "/organizer/:id/invitations": wrap({ component: OrganizerMembers, conditions: [isOrganizer] }),
     "/organizer/:id/profile": wrap({ component: OrganizerProfile, conditions: [isOrganizer] }),
