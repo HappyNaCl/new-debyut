@@ -21,6 +21,8 @@ var (
 	ErrInvalidImageKind   = status.Error(codes.InvalidArgument, "Image kind must be BANNER, COVER or GALLERY.")
 	ErrEventImageUpload   = status.Error(codes.Internal, "Failed to upload the image.")
 	ErrInvalidEventFilter = status.Error(codes.InvalidArgument, "Filter must be DRAFT, ACTIVE or PAST.")
+	ErrInvalidEventSearch = status.Error(codes.InvalidArgument, "Search filters are invalid.")
+	ErrSearchUnavailable  = status.Error(codes.Unavailable, "Search is temporarily unavailable. Please try again.")
 )
 
 // EventValidationError lists what is wrong with an event, keyed by field

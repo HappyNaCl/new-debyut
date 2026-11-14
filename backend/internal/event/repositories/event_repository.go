@@ -24,8 +24,20 @@ func (r *EventRepository) Create(ctx context.Context, event *models.Event) error
 		if err := tx.Omit("Tickets", "Category").Create(event).Error; err != nil {
 			return err
 		}
-		return createTickets(tx, event)
+		if err := createTickets(tx, event); err != nil {
+			return err
+		}
+		return enqueueIfPublished(tx, event)
 	})
+}
+
+// enqueueIfPublished queues a search reindex of a published event, in the
+// transaction that published it. Drafts never appear in search.
+func enqueueIfPublished(tx *gorm.DB, event *models.Event) error {
+	if event.Status != models.EventStatusPublished {
+		return nil
+	}
+	return enqueueEvent(tx, event.Id)
 }
 
 // UpdateDraft replaces a draft's fields and tickets. It fails with
@@ -54,7 +66,10 @@ func (r *EventRepository) UpdateDraft(ctx context.Context, event *models.Event) 
 		if err := tx.Where("event_id = ?", event.Id).Delete(&models.TicketType{}).Error; err != nil {
 			return err
 		}
-		return createTickets(tx, event)
+		if err := createTickets(tx, event); err != nil {
+			return err
+		}
+		return enqueueIfPublished(tx, event)
 	})
 }
 
@@ -100,6 +115,47 @@ func (r *EventRepository) ListLatest(ctx context.Context, limit int) ([]models.E
 		Limit(limit).
 		Find(&events).Error
 	return events, err
+}
+
+// ListForIndex loads events by id, whatever their status, with tickets and
+// category, for building search documents. Missing ids are left out.
+func (r *EventRepository) ListForIndex(ctx context.Context, ids []string) ([]models.Event, error) {
+	var events []models.Event
+	err := r.db.WithContext(ctx).
+		Preload("Tickets", func(db *gorm.DB) *gorm.DB { return db.Order("position ASC") }).
+		Preload("Category").
+		Where("id IN ?", ids).
+		Find(&events).Error
+	return events, err
+}
+
+// ListUpcomingByIds returns the published, not yet ended events among ids, in
+// the order of ids (search results arrive ranked). Ids that no longer qualify
+// are dropped, which hides any index entry that is briefly out of date.
+func (r *EventRepository) ListUpcomingByIds(ctx context.Context, ids []string) ([]models.Event, error) {
+	if len(ids) == 0 {
+		return nil, nil
+	}
+	var events []models.Event
+	err := r.db.WithContext(ctx).
+		Preload("Tickets", func(db *gorm.DB) *gorm.DB { return db.Order("position ASC") }).
+		Where("id IN ? AND status = ? AND COALESCE(ends_at, starts_at) >= ?", ids, models.EventStatusPublished, time.Now().UTC()).
+		Find(&events).Error
+	if err != nil {
+		return nil, err
+	}
+
+	byId := make(map[string]models.Event, len(events))
+	for _, event := range events {
+		byId[event.Id] = event
+	}
+	ordered := make([]models.Event, 0, len(events))
+	for _, id := range ids {
+		if event, ok := byId[id]; ok {
+			ordered = append(ordered, event)
+		}
+	}
+	return ordered, nil
 }
 
 type EventFilter string

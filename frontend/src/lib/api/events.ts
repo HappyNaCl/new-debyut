@@ -1,9 +1,11 @@
-import { createQuery } from "@tanstack/svelte-query";
+import { createQuery, keepPreviousData } from "@tanstack/svelte-query";
 import { api } from "./client";
 import type { ApiResponse } from "../types/api";
 import type {
   EventFilter,
   EventImageKind,
+  EventSearchParams,
+  EventSearchResult,
   EventSummary,
   OrganizerEvent,
   PublicEvent,
@@ -82,5 +84,19 @@ export function createLatestEventsQuery(limit: number) {
     queryKey: ["events", "public", "latest", limit],
     queryFn: () => listLatestEvents(limit),
     staleTime: 60 * 1000,
+  }));
+}
+
+export async function searchEvents(params: EventSearchParams) {
+  const response = await api.get<ApiResponse<EventSearchResult>>("/events/search", { params });
+  return response.data.data;
+}
+
+export function createEventSearchQuery(params: () => EventSearchParams) {
+  return createQuery(() => ({
+    queryKey: ["events", "public", "search", params()],
+    queryFn: () => searchEvents(params()),
+    placeholderData: keepPreviousData,
+    staleTime: 30 * 1000,
   }));
 }

@@ -20,6 +20,8 @@ service EventService {
     rpc GetPublishedEvent(GetPublishedEventRequest) returns (Event);
     // Public: the most recently published events that haven't ended yet.
     rpc ListLatestEvents(ListLatestEventsRequest) returns (ListEventsResponse);
+    // Public: full-text search over published events that haven't ended.
+    rpc SearchEvents(SearchEventsRequest) returns (SearchEventsResponse);
 }
 
 message Category {
@@ -152,4 +154,38 @@ message GetPublishedEventRequest {
 message ListLatestEventsRequest {
     // 1-50; defaults to 8.
     int32 limit = 1;
+}
+
+message SearchEventsRequest {
+    // Free text; empty lists every event matching the filters.
+    string query = 1;
+    string category_slug = 2;
+    string city = 3;
+    // Events still running at or after from, and starting at or before to.
+    google.protobuf.Timestamp from = 4;
+    google.protobuf.Timestamp to = 5;
+    // "" (any), VENUE (has venue tickets) or ONLINE (has streaming tickets)
+    string format = 6;
+    // Only events with a free ticket.
+    bool free = 7;
+    // Venues within radius_km of the point; all three are set or none.
+    optional double latitude = 8;
+    optional double longitude = 9;
+    optional double radius_km = 10;
+    // RELEVANCE (default), SOONEST, NEWEST or PRICE_LOW
+    string sort = 11;
+    // 1-based; defaults to 1.
+    int32 page = 12;
+    // 1-48; defaults to 24.
+    int32 page_size = 13;
+}
+
+message SearchEventsResponse {
+    repeated Event events = 1;
+    int64 total = 2;
+    int32 page = 3;
+    int32 page_size = 4;
+    // Matching events per city and per category slug, across all pages.
+    map<string, int32> cities = 5;
+    map<string, int32> categories = 6;
 }

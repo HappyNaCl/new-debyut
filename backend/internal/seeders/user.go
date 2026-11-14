@@ -43,7 +43,11 @@ func SeedUsers(authDb *gorm.DB, userDb *gorm.DB, count int) error {
 	if err != nil {
 		return fmt.Errorf("seed organizer: %w", err)
 	}
-	if err := seedOrganization(userDb, organizerId); err != nil {
+	if _, err := seedOrganization(userDb, organizerId, usersmodels.Organization{
+		Name:        "debyut Live",
+		Email:       "events@debyut.id",
+		Description: "Sample organizer for local development.",
+	}); err != nil {
 		return fmt.Errorf("seed organization: %w", err)
 	}
 
@@ -84,19 +88,16 @@ func seedUser(authDb *gorm.DB, userDb *gorm.DB, email string, role authmodels.Ro
 		FirstOrCreate(&usersmodels.User{}).Error
 }
 
-func seedOrganization(userDb *gorm.DB, ownerId string) error {
-	var member usersmodels.OrganizationMember
-	if err := userDb.Where(usersmodels.OrganizationMember{UserId: ownerId}).First(&member).Error; err == nil {
-		return nil
+// seedOrganization creates an organization owned by ownerId, unless one with
+// the same email exists, and returns its id.
+func seedOrganization(userDb *gorm.DB, ownerId string, organization usersmodels.Organization) (string, error) {
+	var existing usersmodels.Organization
+	if err := userDb.Where("email = ?", organization.Email).First(&existing).Error; err == nil {
+		return existing.Id, nil
 	}
 
-	organization := usersmodels.Organization{
-		Id:          snowflake.Generate(),
-		Name:        "debyut Live",
-		Email:       "events@debyut.id",
-		Description: "Sample organizer for local development.",
-	}
-	return userDb.Transaction(func(tx *gorm.DB) error {
+	organization.Id = snowflake.Generate()
+	return organization.Id, userDb.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(&organization).Error; err != nil {
 			return err
 		}
@@ -104,6 +105,7 @@ func seedOrganization(userDb *gorm.DB, ownerId string) error {
 			OrganizationId: organization.Id,
 			UserId:         ownerId,
 			Role:           usersmodels.MemberRoleOwner,
+			Status:         usersmodels.MemberStatusActive,
 		}).Error
 	})
 }

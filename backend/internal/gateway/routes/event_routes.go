@@ -16,6 +16,7 @@ func RegisterEventRoutes(
 	eventHandler := handlers.NewEventHttpHandler(eventClient, organizationClient)
 
 	api.GET("/events", eventHandler.ListLatest)
+	api.GET("/events/search", eventHandler.Search)
 	api.GET("/events/:id", eventHandler.GetPublic)
 
 	events := api.Group("/organizations/:id/events", middleware.JwtAuth())

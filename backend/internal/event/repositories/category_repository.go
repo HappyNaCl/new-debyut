@@ -29,17 +29,24 @@ func (r *CategoryRepository) Create(ctx context.Context, category *models.Catego
 	return mapDBError(gorm.G[models.Category](r.db).Create(ctx, category))
 }
 
+// Update renames a category and queues its published events for reindexing,
+// since search documents carry the category's name and slug.
 func (r *CategoryRepository) Update(ctx context.Context, category *models.Category) error {
-	result := r.db.WithContext(ctx).Model(&models.Category{}).
-		Where("id = ?", category.Id).
-		Updates(map[string]any{"name": category.Name, "slug": category.Slug, "icon": category.Icon})
-	if result.Error != nil {
-		return mapDBError(result.Error)
-	}
-	if result.RowsAffected == 0 {
-		return apperrors.ErrCategoryNotFound
-	}
-	return r.db.WithContext(ctx).Where("id = ?", category.Id).First(category).Error
+	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		result := tx.Model(&models.Category{}).
+			Where("id = ?", category.Id).
+			Updates(map[string]any{"name": category.Name, "slug": category.Slug, "icon": category.Icon})
+		if result.Error != nil {
+			return mapDBError(result.Error)
+		}
+		if result.RowsAffected == 0 {
+			return apperrors.ErrCategoryNotFound
+		}
+		if err := enqueuePublished(tx, "category_id = ?", category.Id); err != nil {
+			return err
+		}
+		return tx.Where("id = ?", category.Id).First(category).Error
+	})
 }
 
 func (r *CategoryRepository) Delete(ctx context.Context, id string) error {

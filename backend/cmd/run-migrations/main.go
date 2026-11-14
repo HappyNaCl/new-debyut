@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
@@ -8,6 +9,7 @@ import (
 	authmodels "github.com/HappyNaCl/new-debyut/internal/auth/models"
 	"github.com/HappyNaCl/new-debyut/internal/common/database"
 	eventmodels "github.com/HappyNaCl/new-debyut/internal/event/models"
+	eventrepositories "github.com/HappyNaCl/new-debyut/internal/event/repositories"
 	"github.com/HappyNaCl/new-debyut/internal/seeders"
 	usersmodels "github.com/HappyNaCl/new-debyut/internal/users/models"
 	"github.com/joho/godotenv"
@@ -16,6 +18,8 @@ import (
 
 func main() {
 	seed := flag.Bool("seed", false, "seed the database with initial data")
+	eventsPerOrganization := flag.Int("events", 12, "with -seed: events to create per sample organization that has none")
+	reindexSearch := flag.Bool("reindex-search", false, "queue every published event for search reindexing (the event service applies it)")
 	flag.Parse()
 
 	if err := godotenv.Load("../.env.local"); err != nil {
@@ -53,7 +57,15 @@ func main() {
 	eventDb.AutoMigrate(eventmodels.Category{})
 	eventDb.AutoMigrate(eventmodels.Event{})
 	eventDb.AutoMigrate(eventmodels.TicketType{})
+	eventDb.AutoMigrate(eventmodels.SearchOutbox{})
 	fmt.Println("Migrated Event Database")
+
+	if *reindexSearch {
+		if err := eventrepositories.NewSearchOutboxRepository(eventDb).EnqueueAll(context.Background()); err != nil {
+			panic(fmt.Sprintf("Failed to queue search reindex: %v", err))
+		}
+		fmt.Println("Queued all published events for search reindexing")
+	}
 
 	if *seed {
 		if err := seeders.SeedUsers(authDb, userDb, 20); err != nil {
@@ -65,6 +77,18 @@ func main() {
 			panic(fmt.Sprintf("Failed to seed categories: %v", err))
 		}
 		fmt.Println("Seeded Categories")
+
+		organizations, err := seeders.SeedOrganizations(authDb, userDb)
+		if err != nil {
+			panic(fmt.Sprintf("Failed to seed organizations: %v", err))
+		}
+		fmt.Printf("Seeded %d Organizations\n", len(organizations))
+
+		created, err := seeders.SeedEvents(eventDb, organizations, *eventsPerOrganization)
+		if err != nil {
+			panic(fmt.Sprintf("Failed to seed events: %v", err))
+		}
+		fmt.Printf("Seeded %d Events (organizations that already had events were skipped)\n", created)
 	}
 }
 

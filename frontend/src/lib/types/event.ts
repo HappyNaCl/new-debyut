@@ -115,3 +115,35 @@ export interface EventSummary {
   organizer: PublicOrganizer;
   publishedAt: string | null;
 }
+
+export type SearchSort = "RELEVANCE" | "SOONEST" | "NEWEST" | "PRICE_LOW";
+export type SearchFormat = "VENUE" | "ONLINE";
+
+export interface EventSearchParams {
+  q?: string;
+  category?: string;
+  city?: string;
+  /** ISO 8601: events still running at or after this time. */
+  from?: string;
+  /** ISO 8601: events starting at or before this time. */
+  to?: string;
+  format?: SearchFormat;
+  free?: boolean;
+  lat?: number;
+  lng?: number;
+  radiusKm?: number;
+  sort?: SearchSort;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface EventSearchResult {
+  events: EventSummary[];
+  total: number;
+  page: number;
+  pageSize: number;
+  /** Matching events per city, across all pages. */
+  cities: Record<string, number>;
+  /** Matching events per category slug, across all pages. */
+  categories: Record<string, number>;
+}

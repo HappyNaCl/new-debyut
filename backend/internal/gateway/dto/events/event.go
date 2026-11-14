@@ -261,6 +261,57 @@ type ListLatestEventsQuery struct {
 	Limit int32 `form:"limit" binding:"omitempty,min=1,max=50"`
 }
 
+type SearchEventsQuery struct {
+	Query    string `form:"q"        binding:"omitempty,max=200"`
+	Category string `form:"category" binding:"omitempty,max=64"`
+	City     string `form:"city"     binding:"omitempty,max=100"`
+	// RFC 3339 times: events still running at or after from, starting at or before to.
+	From      string   `form:"from"      binding:"omitempty,datetime=2006-01-02T15:04:05Z07:00"`
+	To        string   `form:"to"        binding:"omitempty,datetime=2006-01-02T15:04:05Z07:00"`
+	Format    string   `form:"format"    binding:"omitempty,oneof=VENUE ONLINE"`
+	Free      bool     `form:"free"`
+	Latitude  *float64 `form:"lat"       binding:"omitempty,min=-90,max=90"`
+	Longitude *float64 `form:"lng"       binding:"omitempty,min=-180,max=180"`
+	RadiusKm  *float64 `form:"radiusKm"  binding:"omitempty,gt=0,max=500"`
+	Sort      string   `form:"sort"      binding:"omitempty,oneof=RELEVANCE SOONEST NEWEST PRICE_LOW"`
+	Page      int32    `form:"page"      binding:"omitempty,min=1,max=1000"`
+	PageSize  int32    `form:"pageSize"  binding:"omitempty,min=1,max=48"`
+}
+
+// ToRequest converts the query; from and to were validated by binding.
+func (q SearchEventsQuery) ToRequest() *event.SearchEventsRequest {
+	req := &event.SearchEventsRequest{
+		Query:        q.Query,
+		CategorySlug: q.Category,
+		City:         q.City,
+		Format:       q.Format,
+		Free:         q.Free,
+		Latitude:     q.Latitude,
+		Longitude:    q.Longitude,
+		RadiusKm:     q.RadiusKm,
+		Sort:         q.Sort,
+		Page:         q.Page,
+		PageSize:     q.PageSize,
+	}
+	if from, err := time.Parse(time.RFC3339, q.From); err == nil {
+		req.From = timestamppb.New(from)
+	}
+	if to, err := time.Parse(time.RFC3339, q.To); err == nil {
+		req.To = timestamppb.New(to)
+	}
+	return req
+}
+
+type SearchEventsResponse struct {
+	Events   []*EventSummaryResponse `json:"events"`
+	Total    int64                   `json:"total"`
+	Page     int32                   `json:"page"`
+	PageSize int32                   `json:"pageSize"`
+	// Matching events per city and per category slug, across all pages.
+	Cities     map[string]int32 `json:"cities"`
+	Categories map[string]int32 `json:"categories"`
+}
+
 // EventSummaryResponse is an event card: enough to list it, without the
 // description, terms or full ticket details.
 type EventSummaryResponse struct {

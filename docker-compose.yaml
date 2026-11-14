@@ -126,13 +126,18 @@ services:
     environment:
       - ENVIRONMENT=development
       - EVENT_SERVICE_ADDR=:50053
+      - USER_SERVICE_ADDR=user-service:50052
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_started
+      rabbitmq:
+        condition: service_healthy
       rustfs:
         condition: service_started
+      meilisearch:
+        condition: service_healthy
     networks:
       - network
 
@@ -171,6 +176,26 @@ services:
     networks:
       - network
 
+  meilisearch:
+    container_name: new-debyut-meilisearch
+    image: getmeili/meilisearch:v1.15
+    ports:
+      - "7700:7700"
+    environment:
+      MEILI_ENV: development
+      MEILI_MASTER_KEY: ${MEILISEARCH_MASTER_KEY:?set MEILISEARCH_MASTER_KEY in .env (16+ characters)}
+      MEILI_NO_ANALYTICS: "true"
+    volumes:
+      - meilisearch_data:/meili_data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:7700/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - network
+
   mailpit:
     container_name: new-debyut-mailpit
     image: axllent/mailpit:latest
@@ -203,3 +228,4 @@ volumes:
   redis_data:
   postgres_data:
   rabbitmq_data:
+  meilisearch_data:

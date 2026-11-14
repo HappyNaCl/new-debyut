@@ -97,10 +97,26 @@ func (s *OrganizationService) Update(ctx context.Context, organizationId, actorI
 	if err := s.organizationRepository.Update(ctx, organizationId, name, description); err != nil {
 		return nil, err
 	}
+	if name != organization.Name {
+		s.publishRenamed(ctx, organizationId, name)
+	}
 
 	organization.Name = name
 	organization.Description = description
 	return organization, nil
+}
+
+// publishRenamed tells the event service to refresh organizer names in search.
+// It is best effort: if the publish is lost, search shows the old name until
+// the organization's events are reindexed (run-migrations -reindex-search).
+func (s *OrganizationService) publishRenamed(ctx context.Context, organizationId, name string) {
+	body, err := json.Marshal(events.OrganizationRenamedEvent{OrganizationId: organizationId, Name: name})
+	if err == nil {
+		err = s.publisher.Publish(ctx, topics.ORGANIZATION_RENAMED_TOPIC, body)
+	}
+	if err != nil {
+		l.Logger.Warn("Failed to publish organization renamed event", zap.String("organizationId", organizationId), zap.Error(err))
+	}
 }
 
 func (s *OrganizationService) UpdateAvatar(ctx context.Context, organizationId, actorId string, content []byte) (*models.MembershipOrganization, error) {

@@ -248,9 +248,78 @@ func (h EventHttpHandler) ListLatest(c *gin.Context) {
 		return
 	}
 
-	organizationIds := make([]string, 0, len(res.GetEvents()))
+	summaries, err := h.summaries(c, res.GetEvents())
+	if err != nil {
+		respondError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": summaries})
+}
+
+// @Summary      Search events (public)
+// @Description  Full-text search over published events that haven't ended, with filters. Without q, results are sorted soonest first. cities and categories count matches per city and category slug across all pages.
+// @Tags         Events
+// @Produce      json
+// @Param        q         query     string  false  "Search text"
+// @Param        category  query     string  false  "Category slug"
+// @Param        city      query     string  false  "City (exact)"
+// @Param        from      query     string  false  "RFC 3339: still running at or after"
+// @Param        to        query     string  false  "RFC 3339: starting at or before"
+// @Param        format    query     string  false  "Venue or online"  Enums(VENUE, ONLINE)
+// @Param        free      query     bool    false  "Only events with a free ticket"
+// @Param        lat       query     number  false  "Latitude (with lng and radiusKm)"
+// @Param        lng       query     number  false  "Longitude"
+// @Param        radiusKm  query     number  false  "Radius in km (up to 500)"
+// @Param        sort      query     string  false  "Order"  Enums(RELEVANCE, SOONEST, NEWEST, PRICE_LOW)
+// @Param        page      query     int     false  "Page (default 1)"
+// @Param        pageSize  query     int     false  "Page size (1-48, default 24)"
+// @Success      200  {object}  object{data=dto.SearchEventsResponse}
+// @Failure      400  {object}  object{error=object}  "Validation error"
+// @Failure      503  {object}  object{error=string}  "Search is unavailable"
+// @Router       /events/search [get]
+func (h EventHttpHandler) Search(c *gin.Context) {
+	var query dto.SearchEventsQuery
+	if err := c.ShouldBindQuery(&query); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": validate.ParseErrors(err)})
+		return
+	}
+	near := []bool{query.Latitude != nil, query.Longitude != nil, query.RadiusKm != nil}
+	if (near[0] || near[1] || near[2]) && !(near[0] && near[1] && near[2]) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": gin.H{"radiusKm": "lat, lng and radiusKm must be sent together."}})
+		return
+	}
+
+	res, err := h.eventClient.SearchEvents(c, query.ToRequest())
+	if err != nil {
+		respondError(c, err)
+		return
+	}
+
+	summaries, err := h.summaries(c, res.GetEvents())
+	if err != nil {
+		respondError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": dto.SearchEventsResponse{
+		Events:     summaries,
+		Total:      res.GetTotal(),
+		Page:       res.GetPage(),
+		PageSize:   res.GetPageSize(),
+		Cities:     res.GetCities(),
+		Categories: res.GetCategories(),
+	}})
+}
+
+// summaries turns events into cards, looking their organizers up in one call.
+func (h EventHttpHandler) summaries(c *gin.Context, events []*event.Event) ([]*dto.EventSummaryResponse, error) {
+	summaries := make([]*dto.EventSummaryResponse, 0, len(events))
+	if len(events) == 0 {
+		return summaries, nil
+	}
+
+	organizationIds := make([]string, 0, len(events))
 	seen := map[string]bool{}
-	for _, item := range res.GetEvents() {
+	for _, item := range events {
 		if id := item.GetOrganizationId(); !seen[id] {
 			seen[id] = true
 			organizationIds = append(organizationIds, id)
@@ -258,17 +327,15 @@ func (h EventHttpHandler) ListLatest(c *gin.Context) {
 	}
 	profiles, err := h.organizationClient.ListOrganizationProfiles(c, &users.ListOrganizationProfilesRequest{OrganizationIds: organizationIds})
 	if err != nil {
-		respondError(c, err)
-		return
+		return nil, err
 	}
 	byId := make(map[string]*users.OrganizationProfile, len(profiles.GetOrganizations()))
 	for _, profile := range profiles.GetOrganizations() {
 		byId[profile.GetId()] = profile
 	}
 
-	summaries := make([]*dto.EventSummaryResponse, 0, len(res.GetEvents()))
-	for _, item := range res.GetEvents() {
+	for _, item := range events {
 		summaries = append(summaries, dto.NewEventSummaryResponse(item, byId[item.GetOrganizationId()]))
 	}
-	c.JSON(http.StatusOK, gin.H{"data": summaries})
+	return summaries, nil
 }

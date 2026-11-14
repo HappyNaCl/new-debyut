@@ -23,3 +23,6 @@ migrate:
 
 seed: 
 	go run .\cmd\run-migrations --seed
+
+reindex-search:
+	go run .\cmd\run-migrations --reindex-search

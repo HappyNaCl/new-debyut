@@ -1138,6 +1138,239 @@ func (x *ListLatestEventsRequest) GetLimit() int32 {
 	return 0
 }
 
+type SearchEventsRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Free text; empty lists every event matching the filters.
+	Query        string `protobuf:"bytes,1,opt,name=query,proto3" json:"query,omitempty"`
+	CategorySlug string `protobuf:"bytes,2,opt,name=category_slug,json=categorySlug,proto3" json:"category_slug,omitempty"`
+	City         string `protobuf:"bytes,3,opt,name=city,proto3" json:"city,omitempty"`
+	// Events still running at or after from, and starting at or before to.
+	From *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=from,proto3" json:"from,omitempty"`
+	To   *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=to,proto3" json:"to,omitempty"`
+	// "" (any), VENUE (has venue tickets) or ONLINE (has streaming tickets)
+	Format string `protobuf:"bytes,6,opt,name=format,proto3" json:"format,omitempty"`
+	// Only events with a free ticket.
+	Free bool `protobuf:"varint,7,opt,name=free,proto3" json:"free,omitempty"`
+	// Venues within radius_km of the point; all three are set or none.
+	Latitude  *float64 `protobuf:"fixed64,8,opt,name=latitude,proto3,oneof" json:"latitude,omitempty"`
+	Longitude *float64 `protobuf:"fixed64,9,opt,name=longitude,proto3,oneof" json:"longitude,omitempty"`
+	RadiusKm  *float64 `protobuf:"fixed64,10,opt,name=radius_km,json=radiusKm,proto3,oneof" json:"radius_km,omitempty"`
+	// RELEVANCE (default), SOONEST, NEWEST or PRICE_LOW
+	Sort string `protobuf:"bytes,11,opt,name=sort,proto3" json:"sort,omitempty"`
+	// 1-based; defaults to 1.
+	Page int32 `protobuf:"varint,12,opt,name=page,proto3" json:"page,omitempty"`
+	// 1-48; defaults to 24.
+	PageSize      int32 `protobuf:"varint,13,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SearchEventsRequest) Reset() {
+	*x = SearchEventsRequest{}
+	mi := &file_api_protobuf_event_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SearchEventsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SearchEventsRequest) ProtoMessage() {}
+
+func (x *SearchEventsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_protobuf_event_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SearchEventsRequest.ProtoReflect.Descriptor instead.
+func (*SearchEventsRequest) Descriptor() ([]byte, []int) {
+	return file_api_protobuf_event_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *SearchEventsRequest) GetQuery() string {
+	if x != nil {
+		return x.Query
+	}
+	return ""
+}
+
+func (x *SearchEventsRequest) GetCategorySlug() string {
+	if x != nil {
+		return x.CategorySlug
+	}
+	return ""
+}
+
+func (x *SearchEventsRequest) GetCity() string {
+	if x != nil {
+		return x.City
+	}
+	return ""
+}
+
+func (x *SearchEventsRequest) GetFrom() *timestamppb.Timestamp {
+	if x != nil {
+		return x.From
+	}
+	return nil
+}
+
+func (x *SearchEventsRequest) GetTo() *timestamppb.Timestamp {
+	if x != nil {
+		return x.To
+	}
+	return nil
+}
+
+func (x *SearchEventsRequest) GetFormat() string {
+	if x != nil {
+		return x.Format
+	}
+	return ""
+}
+
+func (x *SearchEventsRequest) GetFree() bool {
+	if x != nil {
+		return x.Free
+	}
+	return false
+}
+
+func (x *SearchEventsRequest) GetLatitude() float64 {
+	if x != nil && x.Latitude != nil {
+		return *x.Latitude
+	}
+	return 0
+}
+
+func (x *SearchEventsRequest) GetLongitude() float64 {
+	if x != nil && x.Longitude != nil {
+		return *x.Longitude
+	}
+	return 0
+}
+
+func (x *SearchEventsRequest) GetRadiusKm() float64 {
+	if x != nil && x.RadiusKm != nil {
+		return *x.RadiusKm
+	}
+	return 0
+}
+
+func (x *SearchEventsRequest) GetSort() string {
+	if x != nil {
+		return x.Sort
+	}
+	return ""
+}
+
+func (x *SearchEventsRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *SearchEventsRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type SearchEventsResponse struct {
+	state    protoimpl.MessageState `protogen:"open.v1"`
+	Events   []*Event               `protobuf:"bytes,1,rep,name=events,proto3" json:"events,omitempty"`
+	Total    int64                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	Page     int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize int32                  `protobuf:"varint,4,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// Matching events per city and per category slug, across all pages.
+	Cities        map[string]int32 `protobuf:"bytes,5,rep,name=cities,proto3" json:"cities,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
+	Categories    map[string]int32 `protobuf:"bytes,6,rep,name=categories,proto3" json:"categories,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SearchEventsResponse) Reset() {
+	*x = SearchEventsResponse{}
+	mi := &file_api_protobuf_event_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SearchEventsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SearchEventsResponse) ProtoMessage() {}
+
+func (x *SearchEventsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_protobuf_event_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SearchEventsResponse.ProtoReflect.Descriptor instead.
+func (*SearchEventsResponse) Descriptor() ([]byte, []int) {
+	return file_api_protobuf_event_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *SearchEventsResponse) GetEvents() []*Event {
+	if x != nil {
+		return x.Events
+	}
+	return nil
+}
+
+func (x *SearchEventsResponse) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *SearchEventsResponse) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *SearchEventsResponse) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *SearchEventsResponse) GetCities() map[string]int32 {
+	if x != nil {
+		return x.Cities
+	}
+	return nil
+}
+
+func (x *SearchEventsResponse) GetCategories() map[string]int32 {
+	if x != nil {
+		return x.Categories
+	}
+	return nil
+}
+
 var File_api_protobuf_event_proto protoreflect.FileDescriptor
 
 const file_api_protobuf_event_proto_rawDesc = "" +
@@ -1242,7 +1475,42 @@ const file_api_protobuf_event_proto_rawDesc = "" +
 	"\x18GetPublishedEventRequest\x12\x19\n" +
 	"\bevent_id\x18\x01 \x01(\tR\aeventId\"/\n" +
 	"\x17ListLatestEventsRequest\x12\x14\n" +
-	"\x05limit\x18\x01 \x01(\x05R\x05limit2\xf2\x04\n" +
+	"\x05limit\x18\x01 \x01(\x05R\x05limit\"\xc0\x03\n" +
+	"\x13SearchEventsRequest\x12\x14\n" +
+	"\x05query\x18\x01 \x01(\tR\x05query\x12#\n" +
+	"\rcategory_slug\x18\x02 \x01(\tR\fcategorySlug\x12\x12\n" +
+	"\x04city\x18\x03 \x01(\tR\x04city\x12.\n" +
+	"\x04from\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\x04from\x12*\n" +
+	"\x02to\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\x02to\x12\x16\n" +
+	"\x06format\x18\x06 \x01(\tR\x06format\x12\x12\n" +
+	"\x04free\x18\a \x01(\bR\x04free\x12\x1f\n" +
+	"\blatitude\x18\b \x01(\x01H\x00R\blatitude\x88\x01\x01\x12!\n" +
+	"\tlongitude\x18\t \x01(\x01H\x01R\tlongitude\x88\x01\x01\x12 \n" +
+	"\tradius_km\x18\n" +
+	" \x01(\x01H\x02R\bradiusKm\x88\x01\x01\x12\x12\n" +
+	"\x04sort\x18\v \x01(\tR\x04sort\x12\x12\n" +
+	"\x04page\x18\f \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\r \x01(\x05R\bpageSizeB\v\n" +
+	"\t_latitudeB\f\n" +
+	"\n" +
+	"_longitudeB\f\n" +
+	"\n" +
+	"_radius_km\"\xf9\x02\n" +
+	"\x14SearchEventsResponse\x12\x1e\n" +
+	"\x06events\x18\x01 \x03(\v2\x06.EventR\x06events\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\bpageSize\x129\n" +
+	"\x06cities\x18\x05 \x03(\v2!.SearchEventsResponse.CitiesEntryR\x06cities\x12E\n" +
+	"\n" +
+	"categories\x18\x06 \x03(\v2%.SearchEventsResponse.CategoriesEntryR\n" +
+	"categories\x1a9\n" +
+	"\vCitiesEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\x05R\x05value:\x028\x01\x1a=\n" +
+	"\x0fCategoriesEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\x05R\x05value:\x028\x012\xaf\x05\n" +
 	"\fEventService\x12A\n" +
 	"\x0eListCategories\x12\x16.google.protobuf.Empty\x1a\x17.ListCategoriesResponse\x123\n" +
 	"\x0eCreateCategory\x12\x16.CreateCategoryRequest\x1a\t.Category\x123\n" +
@@ -1255,7 +1523,8 @@ const file_api_protobuf_event_proto_rawDesc = "" +
 	"\n" +
 	"ListEvents\x12\x12.ListEventsRequest\x1a\x13.ListEventsResponse\x126\n" +
 	"\x11GetPublishedEvent\x12\x19.GetPublishedEventRequest\x1a\x06.Event\x12A\n" +
-	"\x10ListLatestEvents\x12\x18.ListLatestEventsRequest\x1a\x13.ListEventsResponseB9Z7github.com/HappyNaCl/new-debyut/internal/genproto/eventb\x06proto3"
+	"\x10ListLatestEvents\x12\x18.ListLatestEventsRequest\x1a\x13.ListEventsResponse\x12;\n" +
+	"\fSearchEvents\x12\x14.SearchEventsRequest\x1a\x15.SearchEventsResponseB9Z7github.com/HappyNaCl/new-debyut/internal/genproto/eventb\x06proto3"
 
 var (
 	file_api_protobuf_event_proto_rawDescOnce sync.Once
@@ -1269,7 +1538,7 @@ func file_api_protobuf_event_proto_rawDescGZIP() []byte {
 	return file_api_protobuf_event_proto_rawDescData
 }
 
-var file_api_protobuf_event_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
+var file_api_protobuf_event_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
 var file_api_protobuf_event_proto_goTypes = []any{
 	(*Category)(nil),                 // 0: Category
 	(*ListCategoriesResponse)(nil),   // 1: ListCategoriesResponse
@@ -1287,51 +1556,62 @@ var file_api_protobuf_event_proto_goTypes = []any{
 	(*ListEventsResponse)(nil),       // 13: ListEventsResponse
 	(*GetPublishedEventRequest)(nil), // 14: GetPublishedEventRequest
 	(*ListLatestEventsRequest)(nil),  // 15: ListLatestEventsRequest
-	(*timestamppb.Timestamp)(nil),    // 16: google.protobuf.Timestamp
-	(*emptypb.Empty)(nil),            // 17: google.protobuf.Empty
+	(*SearchEventsRequest)(nil),      // 16: SearchEventsRequest
+	(*SearchEventsResponse)(nil),     // 17: SearchEventsResponse
+	nil,                              // 18: SearchEventsResponse.CitiesEntry
+	nil,                              // 19: SearchEventsResponse.CategoriesEntry
+	(*timestamppb.Timestamp)(nil),    // 20: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),            // 21: google.protobuf.Empty
 }
 var file_api_protobuf_event_proto_depIdxs = []int32{
-	16, // 0: Category.created_at:type_name -> google.protobuf.Timestamp
-	16, // 1: Category.updated_at:type_name -> google.protobuf.Timestamp
+	20, // 0: Category.created_at:type_name -> google.protobuf.Timestamp
+	20, // 1: Category.updated_at:type_name -> google.protobuf.Timestamp
 	0,  // 2: ListCategoriesResponse.categories:type_name -> Category
-	16, // 3: TicketType.sales_start_at:type_name -> google.protobuf.Timestamp
-	16, // 4: TicketType.sales_end_at:type_name -> google.protobuf.Timestamp
-	16, // 5: EventInput.starts_at:type_name -> google.protobuf.Timestamp
-	16, // 6: EventInput.ends_at:type_name -> google.protobuf.Timestamp
+	20, // 3: TicketType.sales_start_at:type_name -> google.protobuf.Timestamp
+	20, // 4: TicketType.sales_end_at:type_name -> google.protobuf.Timestamp
+	20, // 5: EventInput.starts_at:type_name -> google.protobuf.Timestamp
+	20, // 6: EventInput.ends_at:type_name -> google.protobuf.Timestamp
 	7,  // 7: EventInput.tickets:type_name -> TicketType
 	8,  // 8: SaveEventRequest.event:type_name -> EventInput
 	8,  // 9: Event.details:type_name -> EventInput
-	16, // 10: Event.published_at:type_name -> google.protobuf.Timestamp
-	16, // 11: Event.created_at:type_name -> google.protobuf.Timestamp
-	16, // 12: Event.updated_at:type_name -> google.protobuf.Timestamp
+	20, // 10: Event.published_at:type_name -> google.protobuf.Timestamp
+	20, // 11: Event.created_at:type_name -> google.protobuf.Timestamp
+	20, // 12: Event.updated_at:type_name -> google.protobuf.Timestamp
 	12, // 13: ListEventsResponse.events:type_name -> Event
-	17, // 14: EventService.ListCategories:input_type -> google.protobuf.Empty
-	2,  // 15: EventService.CreateCategory:input_type -> CreateCategoryRequest
-	3,  // 16: EventService.UpdateCategory:input_type -> UpdateCategoryRequest
-	4,  // 17: EventService.DeleteCategory:input_type -> DeleteCategoryRequest
-	5,  // 18: EventService.UploadEventImage:input_type -> UploadEventImageRequest
-	9,  // 19: EventService.CreateEvent:input_type -> SaveEventRequest
-	9,  // 20: EventService.UpdateEvent:input_type -> SaveEventRequest
-	10, // 21: EventService.GetEvent:input_type -> GetEventRequest
-	11, // 22: EventService.ListEvents:input_type -> ListEventsRequest
-	14, // 23: EventService.GetPublishedEvent:input_type -> GetPublishedEventRequest
-	15, // 24: EventService.ListLatestEvents:input_type -> ListLatestEventsRequest
-	1,  // 25: EventService.ListCategories:output_type -> ListCategoriesResponse
-	0,  // 26: EventService.CreateCategory:output_type -> Category
-	0,  // 27: EventService.UpdateCategory:output_type -> Category
-	17, // 28: EventService.DeleteCategory:output_type -> google.protobuf.Empty
-	6,  // 29: EventService.UploadEventImage:output_type -> UploadEventImageResponse
-	12, // 30: EventService.CreateEvent:output_type -> Event
-	12, // 31: EventService.UpdateEvent:output_type -> Event
-	12, // 32: EventService.GetEvent:output_type -> Event
-	13, // 33: EventService.ListEvents:output_type -> ListEventsResponse
-	12, // 34: EventService.GetPublishedEvent:output_type -> Event
-	13, // 35: EventService.ListLatestEvents:output_type -> ListEventsResponse
-	25, // [25:36] is the sub-list for method output_type
-	14, // [14:25] is the sub-list for method input_type
-	14, // [14:14] is the sub-list for extension type_name
-	14, // [14:14] is the sub-list for extension extendee
-	0,  // [0:14] is the sub-list for field type_name
+	20, // 14: SearchEventsRequest.from:type_name -> google.protobuf.Timestamp
+	20, // 15: SearchEventsRequest.to:type_name -> google.protobuf.Timestamp
+	12, // 16: SearchEventsResponse.events:type_name -> Event
+	18, // 17: SearchEventsResponse.cities:type_name -> SearchEventsResponse.CitiesEntry
+	19, // 18: SearchEventsResponse.categories:type_name -> SearchEventsResponse.CategoriesEntry
+	21, // 19: EventService.ListCategories:input_type -> google.protobuf.Empty
+	2,  // 20: EventService.CreateCategory:input_type -> CreateCategoryRequest
+	3,  // 21: EventService.UpdateCategory:input_type -> UpdateCategoryRequest
+	4,  // 22: EventService.DeleteCategory:input_type -> DeleteCategoryRequest
+	5,  // 23: EventService.UploadEventImage:input_type -> UploadEventImageRequest
+	9,  // 24: EventService.CreateEvent:input_type -> SaveEventRequest
+	9,  // 25: EventService.UpdateEvent:input_type -> SaveEventRequest
+	10, // 26: EventService.GetEvent:input_type -> GetEventRequest
+	11, // 27: EventService.ListEvents:input_type -> ListEventsRequest
+	14, // 28: EventService.GetPublishedEvent:input_type -> GetPublishedEventRequest
+	15, // 29: EventService.ListLatestEvents:input_type -> ListLatestEventsRequest
+	16, // 30: EventService.SearchEvents:input_type -> SearchEventsRequest
+	1,  // 31: EventService.ListCategories:output_type -> ListCategoriesResponse
+	0,  // 32: EventService.CreateCategory:output_type -> Category
+	0,  // 33: EventService.UpdateCategory:output_type -> Category
+	21, // 34: EventService.DeleteCategory:output_type -> google.protobuf.Empty
+	6,  // 35: EventService.UploadEventImage:output_type -> UploadEventImageResponse
+	12, // 36: EventService.CreateEvent:output_type -> Event
+	12, // 37: EventService.UpdateEvent:output_type -> Event
+	12, // 38: EventService.GetEvent:output_type -> Event
+	13, // 39: EventService.ListEvents:output_type -> ListEventsResponse
+	12, // 40: EventService.GetPublishedEvent:output_type -> Event
+	13, // 41: EventService.ListLatestEvents:output_type -> ListEventsResponse
+	17, // 42: EventService.SearchEvents:output_type -> SearchEventsResponse
+	31, // [31:43] is the sub-list for method output_type
+	19, // [19:31] is the sub-list for method input_type
+	19, // [19:19] is the sub-list for extension type_name
+	19, // [19:19] is the sub-list for extension extendee
+	0,  // [0:19] is the sub-list for field type_name
 }
 
 func init() { file_api_protobuf_event_proto_init() }
@@ -1340,13 +1620,14 @@ func file_api_protobuf_event_proto_init() {
 		return
 	}
 	file_api_protobuf_event_proto_msgTypes[8].OneofWrappers = []any{}
+	file_api_protobuf_event_proto_msgTypes[16].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_protobuf_event_proto_rawDesc), len(file_api_protobuf_event_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   16,
+			NumMessages:   20,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

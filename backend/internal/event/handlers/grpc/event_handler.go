@@ -4,7 +4,9 @@ import (
 	"context"
 	"time"
 
+	"github.com/HappyNaCl/new-debyut/internal/apperrors"
 	"github.com/HappyNaCl/new-debyut/internal/event/models"
+	"github.com/HappyNaCl/new-debyut/internal/event/search"
 	"github.com/HappyNaCl/new-debyut/internal/event/services"
 	"github.com/HappyNaCl/new-debyut/internal/genproto/event"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -60,6 +62,53 @@ func (h *EventGrpcHandler) ListLatestEvents(ctx context.Context, req *event.List
 		response.Events = append(response.Events, toEventResponse(&events[index]))
 	}
 	return response, nil
+}
+
+func (h *EventGrpcHandler) SearchEvents(ctx context.Context, req *event.SearchEventsRequest) (*event.SearchEventsResponse, error) {
+	query := search.Query{
+		Text:         req.GetQuery(),
+		CategorySlug: req.GetCategorySlug(),
+		City:         req.GetCity(),
+		From:         fromTimestamp(req.GetFrom()),
+		To:           fromTimestamp(req.GetTo()),
+		Format:       search.Format(req.GetFormat()),
+		Free:         req.GetFree(),
+		Sort:         search.Sort(req.GetSort()),
+		Page:         int(req.GetPage()),
+		PageSize:     int(req.GetPageSize()),
+	}
+	if req.Latitude != nil || req.Longitude != nil || req.RadiusKm != nil {
+		if req.Latitude == nil || req.Longitude == nil || req.RadiusKm == nil {
+			return nil, apperrors.ErrInvalidEventSearch
+		}
+		query.Near = true
+		query.Latitude, query.Longitude, query.RadiusKm = req.GetLatitude(), req.GetLongitude(), req.GetRadiusKm()
+	}
+
+	result, err := h.eventSvc.Search(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	response := &event.SearchEventsResponse{
+		Events:     make([]*event.Event, 0, len(result.Events)),
+		Total:      result.Total,
+		Page:       int32(result.Page),
+		PageSize:   int32(result.PageSize),
+		Cities:     toCounts(result.Cities),
+		Categories: toCounts(result.Categories),
+	}
+	for index := range result.Events {
+		response.Events = append(response.Events, toEventResponse(&result.Events[index]))
+	}
+	return response, nil
+}
+
+func toCounts(counts map[string]int) map[string]int32 {
+	converted := make(map[string]int32, len(counts))
+	for key, count := range counts {
+		converted[key] = int32(count)
+	}
+	return converted
 }
 
 func (h *EventGrpcHandler) ListEvents(ctx context.Context, req *event.ListEventsRequest) (*event.ListEventsResponse, error) {

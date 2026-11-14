@@ -5,4 +5,5 @@ const (
 	OTP_REQUESTED_TOPIC                   = "otp.requested"
 	ORGANIZER_STATUS_CHANGED_TOPIC        = "user.organizer-status.changed"
 	ORGANIZATION_INVITATION_CREATED_TOPIC = "organization.invitation.created"
+	ORGANIZATION_RENAMED_TOPIC            = "organization.renamed"
 )

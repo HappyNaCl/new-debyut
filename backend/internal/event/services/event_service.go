@@ -17,6 +17,7 @@ import (
 	"github.com/HappyNaCl/new-debyut/internal/common/storage"
 	"github.com/HappyNaCl/new-debyut/internal/event/models"
 	"github.com/HappyNaCl/new-debyut/internal/event/repositories"
+	"github.com/HappyNaCl/new-debyut/internal/event/search"
 	"go.uber.org/zap"
 )
 
@@ -58,13 +59,20 @@ type EventService struct {
 	eventRepository    *repositories.EventRepository
 	categoryRepository *repositories.CategoryRepository
 	storage            *storage.Client
+	searcher           *search.Searcher
 }
 
-func NewEventService(eventRepository *repositories.EventRepository, categoryRepository *repositories.CategoryRepository, storage *storage.Client) *EventService {
+func NewEventService(
+	eventRepository *repositories.EventRepository,
+	categoryRepository *repositories.CategoryRepository,
+	storage *storage.Client,
+	searcher *search.Searcher,
+) *EventService {
 	return &EventService{
 		eventRepository:    eventRepository,
 		categoryRepository: categoryRepository,
 		storage:            storage,
+		searcher:           searcher,
 	}
 }
 
@@ -138,6 +146,79 @@ func (s *EventService) ListLatest(ctx context.Context, limit int) ([]models.Even
 		limit = defaultLatestEvents
 	}
 	return s.eventRepository.ListLatest(ctx, min(limit, maxLatestEvents))
+}
+
+const (
+	defaultSearchPageSize = 24
+	maxSearchPageSize     = 48
+	maxSearchRadiusKm     = 500
+	maxSearchQueryRunes   = 200
+)
+
+// SearchResult is one page of search results, ranked.
+type SearchResult struct {
+	Events     []models.Event
+	Total      int64
+	Page       int
+	PageSize   int
+	Cities     map[string]int
+	Categories map[string]int
+}
+
+// Search finds published events that haven't ended. Meilisearch ranks the
+// matches; the events themselves are read from the database, so a result
+// whose index entry is briefly stale is dropped rather than shown wrong.
+func (s *EventService) Search(ctx context.Context, query search.Query) (*SearchResult, error) {
+	query.Text = strings.TrimSpace(query.Text)
+	query.CategorySlug = strings.TrimSpace(query.CategorySlug)
+	query.City = strings.TrimSpace(query.City)
+	if utf8.RuneCountInString(query.Text) > maxSearchQueryRunes {
+		return nil, apperrors.ErrInvalidEventSearch
+	}
+	switch query.Sort {
+	case "":
+		query.Sort = search.SortRelevance
+	case search.SortRelevance, search.SortSoonest, search.SortNewest, search.SortPriceLow:
+	default:
+		return nil, apperrors.ErrInvalidEventSearch
+	}
+	switch query.Format {
+	case search.FormatAny, search.FormatVenue, search.FormatOnline:
+	default:
+		return nil, apperrors.ErrInvalidEventSearch
+	}
+	if query.From != nil && query.To != nil && query.To.Before(*query.From) {
+		return nil, apperrors.ErrInvalidEventSearch
+	}
+	if query.Near && (query.Latitude < -90 || query.Latitude > 90 || query.Longitude < -180 || query.Longitude > 180 ||
+		query.RadiusKm <= 0 || query.RadiusKm > maxSearchRadiusKm) {
+		return nil, apperrors.ErrInvalidEventSearch
+	}
+	if query.Page < 1 {
+		query.Page = 1
+	}
+	if query.PageSize < 1 {
+		query.PageSize = defaultSearchPageSize
+	}
+	query.PageSize = min(query.PageSize, maxSearchPageSize)
+
+	found, err := s.searcher.Search(ctx, query)
+	if err != nil {
+		l.Logger.Warn("event search failed", zap.Error(err))
+		return nil, apperrors.ErrSearchUnavailable
+	}
+	events, err := s.eventRepository.ListUpcomingByIds(ctx, found.Ids)
+	if err != nil {
+		return nil, err
+	}
+	return &SearchResult{
+		Events:     events,
+		Total:      found.Total,
+		Page:       query.Page,
+		PageSize:   query.PageSize,
+		Cities:     found.Cities,
+		Categories: found.Categories,
+	}, nil
 }
 
 func (s *EventService) List(ctx context.Context, organizationId string, filter string) ([]models.Event, error) {

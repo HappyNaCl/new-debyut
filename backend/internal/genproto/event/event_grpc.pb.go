@@ -31,6 +31,7 @@ const (
 	EventService_ListEvents_FullMethodName        = "/EventService/ListEvents"
 	EventService_GetPublishedEvent_FullMethodName = "/EventService/GetPublishedEvent"
 	EventService_ListLatestEvents_FullMethodName  = "/EventService/ListLatestEvents"
+	EventService_SearchEvents_FullMethodName      = "/EventService/SearchEvents"
 )
 
 // EventServiceClient is the client API for EventService service.
@@ -50,6 +51,8 @@ type EventServiceClient interface {
 	GetPublishedEvent(ctx context.Context, in *GetPublishedEventRequest, opts ...grpc.CallOption) (*Event, error)
 	// Public: the most recently published events that haven't ended yet.
 	ListLatestEvents(ctx context.Context, in *ListLatestEventsRequest, opts ...grpc.CallOption) (*ListEventsResponse, error)
+	// Public: full-text search over published events that haven't ended.
+	SearchEvents(ctx context.Context, in *SearchEventsRequest, opts ...grpc.CallOption) (*SearchEventsResponse, error)
 }
 
 type eventServiceClient struct {
@@ -170,6 +173,16 @@ func (c *eventServiceClient) ListLatestEvents(ctx context.Context, in *ListLates
 	return out, nil
 }
 
+func (c *eventServiceClient) SearchEvents(ctx context.Context, in *SearchEventsRequest, opts ...grpc.CallOption) (*SearchEventsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SearchEventsResponse)
+	err := c.cc.Invoke(ctx, EventService_SearchEvents_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // EventServiceServer is the server API for EventService service.
 // All implementations must embed UnimplementedEventServiceServer
 // for forward compatibility.
@@ -187,6 +200,8 @@ type EventServiceServer interface {
 	GetPublishedEvent(context.Context, *GetPublishedEventRequest) (*Event, error)
 	// Public: the most recently published events that haven't ended yet.
 	ListLatestEvents(context.Context, *ListLatestEventsRequest) (*ListEventsResponse, error)
+	// Public: full-text search over published events that haven't ended.
+	SearchEvents(context.Context, *SearchEventsRequest) (*SearchEventsResponse, error)
 	mustEmbedUnimplementedEventServiceServer()
 }
 
@@ -229,6 +244,9 @@ func (UnimplementedEventServiceServer) GetPublishedEvent(context.Context, *GetPu
 }
 func (UnimplementedEventServiceServer) ListLatestEvents(context.Context, *ListLatestEventsRequest) (*ListEventsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListLatestEvents not implemented")
+}
+func (UnimplementedEventServiceServer) SearchEvents(context.Context, *SearchEventsRequest) (*SearchEventsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SearchEvents not implemented")
 }
 func (UnimplementedEventServiceServer) mustEmbedUnimplementedEventServiceServer() {}
 func (UnimplementedEventServiceServer) testEmbeddedByValue()                      {}
@@ -449,6 +467,24 @@ func _EventService_ListLatestEvents_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _EventService_SearchEvents_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchEventsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EventServiceServer).SearchEvents(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: EventService_SearchEvents_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EventServiceServer).SearchEvents(ctx, req.(*SearchEventsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // EventService_ServiceDesc is the grpc.ServiceDesc for EventService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -499,6 +535,10 @@ var EventService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListLatestEvents",
 			Handler:    _EventService_ListLatestEvents_Handler,
+		},
+		{
+			MethodName: "SearchEvents",
+			Handler:    _EventService_SearchEvents_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
